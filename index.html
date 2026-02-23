@@ -229,6 +229,43 @@ input[type="range"]::-moz-range-thumb{width:26px;height:26px;border-radius:13px;
 .profile-card .profile-icon{font-size:28px;margin-bottom:4px}
 .profile-card .profile-name{font-size:12px;font-weight:700;color:var(--text)}
 .profile-card .profile-desc{font-size:10px;color:var(--dim);margin-top:2px}
+
+/* ─── Collapsible Groups ─── */
+.collapsible-title{cursor:pointer;-webkit-user-select:none;user-select:none}
+.collapse-arrow{margin-left:auto;font-size:10px;color:var(--dim);transition:transform .2s}
+
+/* ─── Voice Memo ─── */
+.voice-btn{display:flex;align-items:center;gap:8px;padding:10px 16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;transition:all .2s}
+.voice-btn:active{background:var(--card)}
+.voice-btn.recording{border-color:var(--danger);color:var(--danger);animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+.voice-timer{font-size:13px;color:var(--danger);font-weight:700;font-variant-numeric:tabular-nums}
+
+/* ─── Swipe Card ─── */
+.card-swipe-wrap{position:relative;overflow:hidden;border-radius:var(--radius);margin-bottom:10px}
+.card-swipe-wrap .entry-card{margin-bottom:0;transition:transform .2s ease;position:relative;z-index:1}
+.card-swipe-actions{position:absolute;right:0;top:0;bottom:0;display:flex;align-items:stretch;z-index:0}
+.card-swipe-action{display:flex;align-items:center;padding:0 18px;font-size:18px;border:none;cursor:pointer;color:var(--white);font-weight:700}
+.card-action-delete{background:var(--danger)}
+.card-action-share{background:#25D366}
+.card-action-clone{background:var(--accent)}
+
+/* ─── Offline Indicator ─── */
+.offline-bar{display:flex;align-items:center;justify-content:center;gap:8px;padding:8px 16px;background:var(--accent-soft);border-bottom:1px solid rgba(249,115,22,.2);font-size:12px;color:var(--accent);font-weight:600}
+.online-dot{width:8px;height:8px;border-radius:4px;flex-shrink:0}
+.online-dot.on{background:var(--green);box-shadow:0 0 6px rgba(34,197,94,.5)}
+.online-dot.off{background:var(--danger);box-shadow:0 0 6px rgba(239,68,68,.5)}
+
+/* ─── Sort Controls ─── */
+.sort-row{display:flex;gap:6px;padding:4px 16px 8px;align-items:center}
+.sort-label{font-size:11px;color:var(--dim);font-weight:600;white-space:nowrap}
+.sort-chip{padding:4px 10px;border-radius:12px;border:1px solid var(--border);background:var(--surface);color:var(--dim);font-size:11px;cursor:pointer;white-space:nowrap;transition:all .15s}
+.sort-chip.active{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
+
+/* ─── Suggestion chips ─── */
+.suggest-row{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.suggest-chip{padding:3px 8px;border-radius:10px;border:1px dashed var(--border);font-size:11px;color:var(--dim);cursor:pointer;background:none;transition:all .15s}
+.suggest-chip:active{border-color:var(--accent);color:var(--accent)}
 </style>
 </head>
 <body>
@@ -278,6 +315,24 @@ const PROFILES = [
   {id:"bistrot",icon:"🍷",name:"Bistrot",desc:"Décontracté",defaults:{types:["Bistrot"],budget:6,ambiance:6,cadence:5,sociabilite:7,notoriete:5}},
 ];
 
+// ─── Price Range Presets ────────────────────────────────────────
+const PRICE_RANGES = {
+  eco: [{l:"< 1 500",min:"0",max:"1500"},{l:"1 500–2 500",min:"1500",max:"2500"},{l:"2 500–4 000",min:"2500",max:"4000"},{l:"4 000+",min:"4000",max:""}],
+  moy: [{l:"3–5 000",min:"3000",max:"5000"},{l:"5–8 000",min:"5000",max:"8000"},{l:"8–12 000",min:"8000",max:"12000"},{l:"12 000+",min:"12000",max:""}],
+  prem: [{l:"8–15 000",min:"8000",max:"15000"},{l:"15–25 000",min:"15000",max:"25000"},{l:"25–50 000",min:"25000",max:"50000"},{l:"50 000+",min:"50000",max:""}],
+  boiss: [{l:"< 500",min:"0",max:"500"},{l:"500–1 000",min:"500",max:"1000"},{l:"1–2 500",min:"1000",max:"2500"},{l:"2 500+",min:"2500",max:""}],
+};
+
+// ─── Hour Presets ───────────────────────────────────────────────
+const HOUR_PRESETS = [
+  {l:"6h–20h",de:"06:00",a:"20:00"},
+  {l:"7h–22h",de:"07:00",a:"22:00"},
+  {l:"8h–23h",de:"08:00",a:"23:00"},
+  {l:"10h–2h",de:"10:00",a:"02:00"},
+  {l:"11h–23h",de:"11:00",a:"23:00"},
+  {l:"24h/24",de:"00:00",a:"23:59"},
+];
+
 // ─── State ───────────────────────────────────────────────────────
 let state = {
   view: "list",
@@ -287,6 +342,8 @@ let state = {
   prevBloc: 0,
   search: "",
   filterPot: "",
+  sortBy: "date",
+  isOnline: navigator.onLine,
 };
 
 function lastSpawter() {
@@ -307,8 +364,8 @@ function emptyEntry() {
     capInt:"",capExt:"",paiements:[],parking:"",parkingN:"",services:[],
     tested:false,platsTestes:"",budgetTest:"",eval:3,forts:["","",""],faibles:["","",""],
     tags:[],reco:"",accroche:"",
-    clientele:[],moments:[],affluence:"",sonore:"",proprete:"",serveurs:"",accueil:"",potentiel:"",notes:"",
-    contactEtabli:"",contactNom:"",fonction:"",receptivite:"",rdv:false,rdvDate:"",materiel:[],notesB2B:"",
+    clientele:[],moments:[],affluence:"",sonore:"",proprete:"",serveurs:"",accueil:"",potentiel:"",notes:"",voiceNotes:"",
+    contactEtabli:"",contactNom:"",fonction:"",receptivite:"",rdv:false,rdvDate:"",materiel:[],notesB2B:"",voiceB2B:"",
   };
 }
 
@@ -474,6 +531,7 @@ function mkChips(label, options, field, multi=true) {
     const active = multi ? (cur||[]).includes(val) : cur === val;
     const chip = h("button", `chip${active?" active":""}`, display);
     chip.addEventListener("click", () => {
+      haptic();
       if(multi) {
         const arr = [...(state.current[field]||[])];
         const idx = arr.indexOf(val);
@@ -518,7 +576,7 @@ function mkStars(field) {
   for(let i=1;i<=5;i++){
     const s = h("button","star","⭐");
     if(i > state.current[field]) s.classList.add("off");
-    s.addEventListener("click", () => { state.current[field] = i; saveDraft(); renderForm(); });
+    s.addEventListener("click", () => { haptic(); state.current[field] = i; saveDraft(); renderForm(); });
     d.appendChild(s);
   }
   return d;
@@ -531,7 +589,7 @@ function mkToggle(label, field) {
   const thumb = h("div","toggle-thumb");
   thumb.style.left = on ? "23px" : "3px";
   track.appendChild(thumb);
-  track.addEventListener("click", () => { state.current[field] = !state.current[field]; saveDraft(); renderForm(); });
+  track.addEventListener("click", () => { haptic(); state.current[field] = !state.current[field]; saveDraft(); renderForm(); });
   d.appendChild(track);
   d.appendChild(h("span","toggle-label",label));
   return d;
@@ -557,6 +615,248 @@ function mkGroup(title, children, icon) {
   }
   children.forEach(c => { if(c) g.appendChild(c); });
   return g;
+}
+
+// ─── Haptic Feedback ────────────────────────────────────────────
+function haptic() { try { navigator.vibrate && navigator.vibrate(10); } catch(e) {} }
+
+// ─── Reverse Geocoding ─────────────────────────────────────────
+function reverseGeocode(lat, lng) {
+  fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&zoom=16&addressdetails=1`)
+    .then(r => r.json())
+    .then(data => {
+      if(!data.address) return;
+      const a = data.address;
+      const suburb = a.suburb || a.neighbourhood || a.city_district || "";
+      if(suburb && !state.current.quartier) {
+        const match = C.quartiers.find(q => suburb.toLowerCase().includes(q.toLowerCase()) || q.toLowerCase().includes(suburb.toLowerCase()));
+        if(match) { state.current.quartier = match; }
+      }
+      if(!state.current.adresse && data.display_name) {
+        state.current.adresse = data.display_name.split(",").slice(0,3).join(",").trim();
+      }
+      saveDraft();
+    }).catch(() => {});
+}
+
+// ─── Duplicate Check ────────────────────────────────────────────
+function checkDuplicate(entry) {
+  return state.entries.find(e => {
+    if(e.id === entry.id) return false;
+    if(entry.nom && e.nom && e.nom.toLowerCase().trim() === entry.nom.toLowerCase().trim()) return e;
+    if(entry.gpsLat && entry.gpsLong && e.gpsLat && e.gpsLong) {
+      const dLat = Math.abs(Number(entry.gpsLat) - Number(e.gpsLat));
+      const dLng = Math.abs(Number(entry.gpsLong) - Number(e.gpsLong));
+      if(dLat < 0.0005 && dLng < 0.0005) return e;
+    }
+    return false;
+  });
+}
+
+// ─── Share via WhatsApp ─────────────────────────────────────────
+function shareEntry(entry) {
+  const pot = C.potentiel.find(p=>p.id===entry.potentiel);
+  const lines = [
+    `*${entry.nom||"Sans nom"}*`,
+    entry.quartier ? `📍 ${entry.quartier}` : "",
+    (entry.types||[]).length ? `🏷️ ${entry.types.join(", ")}` : "",
+    pot ? `${pot.e} ${pot.l}` : "",
+    entry.accroche ? `\n_"${entry.accroche}"_` : "",
+    entry.tested && entry.eval ? `\n⭐ ${entry.eval}/5` : "",
+    `\n— SPAWT Collecte`,
+  ].filter(Boolean).join("\n");
+  const url = `https://wa.me/?text=${encodeURIComponent(lines)}`;
+  window.open(url, "_blank");
+}
+
+// ─── Duplicate Entry ────────────────────────────────────────────
+function duplicateEntry(entry) {
+  const clone = JSON.parse(JSON.stringify(entry));
+  clone.id = Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+  clone.ts = new Date().toISOString();
+  clone.nom = (clone.nom || "") + " (copie)";
+  clone.quickCapture = true;
+  state.entries.unshift(clone);
+  save();
+  renderList();
+  showToast(`"${clone.nom}" dupliqué`,"success","📋");
+}
+
+// ─── Get Suggestions from History ───────────────────────────────
+function getSuggestions(field, index) {
+  const vals = new Set();
+  state.entries.forEach(e => {
+    if(index !== undefined) {
+      const arr = e[field];
+      if(Array.isArray(arr) && arr[index]) vals.add(arr[index]);
+    } else if(Array.isArray(e[field])) {
+      e[field].forEach(v => { if(v) vals.add(v); });
+    } else if(e[field]) { vals.add(e[field]); }
+  });
+  return [...vals].slice(0, 6);
+}
+
+// ─── Collapsible Group ──────────────────────────────────────────
+function mkCollapsible(title, children, icon, startOpen) {
+  const open = startOpen === undefined ? false : startOpen;
+  const g = h("div","field-group");
+  const tEl = h("div","field-group-title collapsible-title",
+    (icon?`<span class="fg-icon">${icon}</span> `:"")+title+`<span class="collapse-arrow">${open?"▼":"▶"}</span>`);
+  g.appendChild(tEl);
+  const content = h("div","collapsible-content");
+  if(!open) content.style.display = "none";
+  children.forEach(c => { if(c) content.appendChild(c); });
+  g.appendChild(content);
+  tEl.addEventListener("click", () => {
+    haptic();
+    const arrow = tEl.querySelector(".collapse-arrow");
+    if(content.style.display === "none") { content.style.display = "block"; arrow.textContent = "▼"; }
+    else { content.style.display = "none"; arrow.textContent = "▶"; }
+  });
+  return g;
+}
+
+// ─── Voice Memo ─────────────────────────────────────────────────
+function mkVoiceMemo(label, field) {
+  const d = h("div","field");
+  if(label) d.appendChild(h("label","label",label));
+  const hasAudio = !!state.current[field];
+  if(hasAudio) {
+    const audio = h("audio",null,null,{controls:""});
+    audio.src = state.current[field];
+    audio.style.cssText = "width:100%;height:40px;margin-bottom:8px";
+    d.appendChild(audio);
+    const del = h("button","voice-btn","✕ Supprimer");
+    del.style.color = "var(--danger)";
+    del.addEventListener("click", () => { state.current[field] = ""; saveDraft(); renderForm(); });
+    d.appendChild(del);
+  } else {
+    let mr = null, chunks = [], timerInterval = null;
+    const btn = h("button","voice-btn btn","🎤 Mémo vocal");
+    const timer = h("span","voice-timer","");
+    timer.style.display = "none";
+    btn.addEventListener("click", async () => {
+      if(mr && mr.state === "recording") { mr.stop(); return; }
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({audio:true});
+        chunks = [];
+        mr = new MediaRecorder(stream);
+        mr.ondataavailable = ev => { if(ev.data.size>0) chunks.push(ev.data); };
+        mr.onstop = () => {
+          stream.getTracks().forEach(t => t.stop());
+          clearInterval(timerInterval);
+          const blob = new Blob(chunks, {type:"audio/webm"});
+          const reader = new FileReader();
+          reader.onload = re => { state.current[field] = re.target.result; saveDraft(); renderForm(); };
+          reader.readAsDataURL(blob);
+        };
+        mr.start(); haptic();
+        btn.innerHTML = "⏹️ Arrêter"; btn.classList.add("recording");
+        let secs = 0; timer.style.display = "inline";
+        timerInterval = setInterval(() => {
+          secs++; timer.textContent = `${secs}s`;
+          if(secs >= 60) mr.stop();
+        }, 1000);
+      } catch(err) { showToast("Micro non disponible","warning","⚠"); }
+    });
+    const row = h("div",null,null);
+    row.style.cssText = "display:flex;align-items:center;gap:8px";
+    row.appendChild(btn); row.appendChild(timer);
+    d.appendChild(row);
+  }
+  return d;
+}
+
+// ─── Price Range Chips ──────────────────────────────────────────
+function mkPriceChips(label, fieldMin, fieldMax, presets) {
+  const d = h("div","field");
+  if(label) d.appendChild(h("label","label",label));
+  const row = h("div","chips");
+  presets.forEach(p => {
+    const isActive = state.current[fieldMin] === p.min && state.current[fieldMax] === p.max;
+    const chip = h("button", `chip${isActive?" active":""}`, p.l);
+    chip.addEventListener("click", () => {
+      haptic();
+      if(isActive) { state.current[fieldMin] = ""; state.current[fieldMax] = ""; }
+      else { state.current[fieldMin] = p.min; state.current[fieldMax] = p.max; }
+      saveDraft(); renderForm();
+    });
+    row.appendChild(chip);
+  });
+  d.appendChild(row);
+  return d;
+}
+
+// ─── Hour Presets ───────────────────────────────────────────────
+function mkHourPresets(fieldDe, fieldA) {
+  const d = h("div","field");
+  d.appendChild(h("label","label","Horaires rapides — 1 tap"));
+  const row = h("div","chips");
+  HOUR_PRESETS.forEach(p => {
+    const active = state.current[fieldDe] === p.de && state.current[fieldA] === p.a;
+    const chip = h("button", `chip${active?" active":""}`, p.l);
+    chip.addEventListener("click", () => {
+      haptic();
+      state.current[fieldDe] = p.de; state.current[fieldA] = p.a;
+      saveDraft(); renderForm();
+    });
+    row.appendChild(chip);
+  });
+  d.appendChild(row);
+  return d;
+}
+
+// ─── Input with Suggestions ────────────────────────────────────
+function mkInputSuggest(label, field, placeholder, index) {
+  const d = index !== undefined
+    ? mkArrayInput(label, field, index, placeholder)
+    : mkInput(label, field, "text", placeholder);
+  const suggs = index !== undefined ? getSuggestions(field, index) : getSuggestions(field);
+  if(suggs.length > 0) {
+    const row = h("div","suggest-row");
+    suggs.forEach(s => {
+      const chip = h("button","suggest-chip",s);
+      chip.addEventListener("click", () => {
+        haptic();
+        if(index !== undefined) {
+          const arr = [...(state.current[field]||[])]; arr[index] = s; state.current[field] = arr;
+        } else { state.current[field] = s; }
+        saveDraft(); renderForm();
+      });
+      row.appendChild(chip);
+    });
+    d.appendChild(row);
+  }
+  return d;
+}
+
+// ─── Swipe Handler for Cards ────────────────────────────────────
+function setupCardSwipe(wrap, card, onSwipeOpen) {
+  let startX = 0, startY = 0, swiped = false, moved = false;
+  card.addEventListener("touchstart", e => {
+    startX = e.touches[0].clientX; startY = e.touches[0].clientY; moved = false;
+  }, {passive:true});
+  card.addEventListener("touchmove", e => {
+    const dx = e.touches[0].clientX - startX;
+    const dy = e.touches[0].clientY - startY;
+    if(Math.abs(dx) > 15 && Math.abs(dx) > Math.abs(dy)) moved = true;
+    if(moved) {
+      const tx = Math.max(Math.min(dx, swiped ? 0 : 10), -160);
+      card.style.transform = `translateX(${swiped ? tx - 160 : tx}px)`;
+    }
+  }, {passive:true});
+  card.addEventListener("touchend", e => {
+    const dx = e.changedTouches[0].clientX - startX;
+    if(moved && dx < -60 && !swiped) {
+      card.style.transform = "translateX(-160px)"; swiped = true;
+      if(onSwipeOpen) onSwipeOpen();
+    } else if(moved && dx > 40 && swiped) {
+      card.style.transform = "translateX(0)"; swiped = false;
+    } else if(moved) {
+      card.style.transform = swiped ? "translateX(-160px)" : "translateX(0)";
+    }
+  }, {passive:true});
+  return { isSwiped: () => swiped || moved, reset: () => { card.style.transform = "translateX(0)"; swiped = false; } };
 }
 
 // ─── Select Dropdown ─────────────────────────────────────────────
@@ -683,6 +983,7 @@ function renderBloc0(container) {
         state.current.gpsLat = pos.coords.latitude.toFixed(6);
         state.current.gpsLong = pos.coords.longitude.toFixed(6);
         saveDraft();
+        reverseGeocode(pos.coords.latitude, pos.coords.longitude);
         showToast("Position GPS capturée","success","📍");
         renderForm();
       }, err => {
@@ -691,7 +992,7 @@ function renderBloc0(container) {
       }, {enableHighAccuracy:true,timeout:10000});
     }
   });
-  container.appendChild(mkGroup("Localisation GPS", [gpsGrid, gpsBtn], "📡"));
+  container.appendChild(mkCollapsible("Localisation GPS", [gpsGrid, gpsBtn], "📡", !!(state.current.gpsLat)));
 
   // Photo du lieu
   container.appendChild(mkGroup("Photo du lieu", [mkPhoto("Photographier le lieu","photoLieu")], "📸"));
@@ -701,11 +1002,11 @@ function renderBloc0(container) {
     mkInput("Spawter collecteur <span class='req'>*</span>","spawter","text","Votre nom"),
   ], "📅"));
 
-  container.appendChild(mkGroup("Contact (optionnel)", [
+  container.appendChild(mkCollapsible("Contact (optionnel)", [
     mkInput("Téléphone","telephone","tel","+225 XX XX XX XX XX"),
     mkChips("Présence digitale", C.digital, "digital"),
     mkInput("URL / Handle","urlHandle","text","@nom ou https://..."),
-  ], "📱"));
+  ], "📱", !!(state.current.telephone || (state.current.digital||[]).length)));
 }
 
 function renderBloc1(container) {
@@ -720,22 +1021,19 @@ function renderBloc1(container) {
   container.appendChild(mkGroup("Cuisine & Spécialités", [
     mkChips("Cuisine dominante", C.cuisines, "cuisines"),
     mkInput("Autre cuisine","autreCuisine","text","Préciser..."),
-    mkArrayInput("Spécialité 1","specs",0,"Ex: Attiéké poisson"),
-    mkArrayInput("Spécialité 2","specs",1,"Ex: Alloco"),
-    mkArrayInput("Spécialité 3","specs",2,"Ex: Kédjénou"),
+    mkInputSuggest("Spécialité 1","specs","Ex: Attiéké poisson",0),
+    mkInputSuggest("Spécialité 2","specs","Ex: Alloco",1),
+    mkInputSuggest("Spécialité 3","specs","Ex: Kédjénou",2),
     mkTextarea("Plats signature observés","platsSignature","Ce qui les distingue..."),
   ], "👨‍🍳"));
 
-  const g = h("div","grid2");
-  g.appendChild(mkInput("Éco min","ecoMin","number","FCFA"));
-  g.appendChild(mkInput("Éco max","ecoMax","number","FCFA"));
-  g.appendChild(mkInput("Moyen min","moyMin","number","FCFA"));
-  g.appendChild(mkInput("Moyen max","moyMax","number","FCFA"));
-  g.appendChild(mkInput("Premium min","premMin","number","FCFA"));
-  g.appendChild(mkInput("Premium max","premMax","number","FCFA"));
-  g.appendChild(mkInput("Boissons min","boissMin","number","FCFA"));
-  g.appendChild(mkInput("Boissons max","boissMax","number","FCFA"));
-  container.appendChild(mkGroup("Grille tarifaire (FCFA)", [g, mkChips("Format du menu", C.menu, "menuType")], "💰"));
+  container.appendChild(mkGroup("Grille tarifaire (FCFA)", [
+    mkPriceChips("Budget éco", "ecoMin", "ecoMax", PRICE_RANGES.eco),
+    mkPriceChips("Budget moyen", "moyMin", "moyMax", PRICE_RANGES.moy),
+    mkPriceChips("Budget premium", "premMin", "premMax", PRICE_RANGES.prem),
+    mkPriceChips("Boissons", "boissMin", "boissMax", PRICE_RANGES.boiss),
+    mkChips("Format du menu", C.menu, "menuType"),
+  ], "💰"));
 
   // Photos menu et plats
   container.appendChild(mkGroup("Photos (optionnel)", [
@@ -791,7 +1089,12 @@ function renderBloc3(container) {
   timeGrid.appendChild(mkInput(null,"hDde","time"));
   timeGrid.appendChild(h("span","mini-label","à"));
   timeGrid.appendChild(mkInput(null,"hDa","time"));
-  const horaireChildren = [timeGrid, mkToggle("Dimanche fermé","dimFerme"), mkChips("Service continu ?",["Oui","Non"],"continu",false)];
+  const horaireChildren = [
+    mkHourPresets("hLVde","hLVa"),
+    timeGrid,
+    mkToggle("Dimanche fermé","dimFerme"),
+    mkChips("Service continu ?",["Oui","Non"],"continu",false),
+  ];
   if(state.current.continu==="Non") horaireChildren.push(mkInput("Horaires de coupure","coupures","text","Ex: 14h-18h"));
   horaireChildren.push(mkInput("Jours de fermeture hebdo","joursFerm","text","Ex: Lundi"));
   container.appendChild(mkGroup("Horaires", horaireChildren, "🕐"));
@@ -805,10 +1108,10 @@ function renderBloc3(container) {
     mkChips(null, C.paiements, "paiements"),
   ], "💳"));
 
-  container.appendChild(mkGroup("Accessibilité", [
+  container.appendChild(mkCollapsible("Accessibilité", [
     mkChips("Parking", C.parking, "parking", false),
     mkInput("Précisions parking","parkingN","text","Détails stationnement..."),
-  ], "🅿️"));
+  ], "🅿️", !!state.current.parking));
 
   container.appendChild(mkGroup("Services additionnels", [
     mkChips(null, C.services, "services"),
@@ -868,7 +1171,8 @@ function renderBloc5(container) {
 
   container.appendChild(mkGroup("Verdict Spawt", [
     mkChips("Potentiel", C.potentiel, "potentiel", false),
-    mkTextarea("Notes libres terrain","notes","Tout ce qui te semble important...",4),
+    mkTextarea("Notes libres terrain","notes","Tout ce qui te semble important...",3),
+    mkVoiceMemo("Ou dicte tes notes", "voiceNotes"),
   ], "🎯"));
 }
 
@@ -894,6 +1198,7 @@ function renderBloc6(container) {
 
   container.appendChild(mkGroup("Notes", [
     mkTextarea("Notes approche commerciale","notesB2B","Résumé de l'échange, prochaines étapes...",3),
+    mkVoiceMemo("Ou dicte tes notes", "voiceB2B"),
   ], "📝"));
 
   // Summary before save on last bloc
@@ -936,6 +1241,20 @@ const BLOCS = [
   {t:"B2B",i:"🤝",r:renderBloc6},
 ];
 
+// ─── Quick Save Helper ──────────────────────────────────────────
+function doQuickSave(e) {
+  e.quickCapture = true;
+  e.spawter = lastSpawter() || "Spawter";
+  if(e.spawter) { try { localStorage.setItem(SPAWTER_KEY, e.spawter); } catch(ex) {} }
+  const idx = state.entries.findIndex(x => x.id === e.id);
+  if(idx >= 0) state.entries[idx] = e;
+  else state.entries.unshift(e);
+  save(); clearDraft();
+  state.view = "list"; renderList();
+  haptic();
+  showToast(`"${e.nom||"Nouveau lieu"}" capturé !`,"success","⚡");
+}
+
 // ─── Render: Quick Capture ───────────────────────────────────────
 function renderQuickCapture() {
   const app = $("#app");
@@ -964,12 +1283,13 @@ function renderQuickCapture() {
     : "📡 Capture GPS en cours..."));
   scroll.appendChild(gpsRow);
 
-  // Auto-trigger GPS
+  // Auto-trigger GPS + reverse geocode
   if(!gpsHas && navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(pos => {
       e.gpsLat = pos.coords.latitude.toFixed(6);
       e.gpsLong = pos.coords.longitude.toFixed(6);
       saveDraft();
+      reverseGeocode(pos.coords.latitude, pos.coords.longitude);
       const el = $(".quick-gps", app);
       if(el) {
         el.className = "quick-gps captured";
@@ -979,11 +1299,12 @@ function renderQuickCapture() {
     }, () => {}, {enableHighAccuracy:true,timeout:10000});
   }
 
-  // Nom
+  // Nom — auto-focus
   scroll.appendChild(h("div","quick-section","Nom du lieu"));
   const nomInput = h("input","quick-input",null,{type:"text",placeholder:"Ex: Chez Tantie Rose",value:e.nom});
   nomInput.addEventListener("input", ev => { e.nom = ev.target.value; saveDraft(); });
   scroll.appendChild(nomInput);
+  requestAnimationFrame(() => { if(!e.nom) nomInput.focus(); });
 
   // Profil rapide
   scroll.appendChild(h("div","quick-section","Profil rapide"));
@@ -1039,17 +1360,14 @@ function renderQuickCapture() {
   const actions = h("div","quick-actions");
   const saveBtn = h("button","btn btn-quick-save","✓ Enregistrer");
   saveBtn.addEventListener("click", () => {
-    e.quickCapture = true;
-    e.spawter = lastSpawter() || "Spawter";
-    if(e.spawter) { try { localStorage.setItem(SPAWTER_KEY, e.spawter); } catch(ex) {} }
-    const idx = state.entries.findIndex(x => x.id === e.id);
-    if(idx >= 0) state.entries[idx] = e;
-    else state.entries.unshift(e);
-    save();
-    clearDraft();
-    state.view = "list";
-    renderList();
-    showToast(`"${e.nom||"Nouveau lieu"}" capturé !`,"success","⚡");
+    const dup = checkDuplicate(e);
+    if(dup) {
+      showConfirm("Doublon possible",
+        `"${dup.nom||"Sans nom"}" existe déjà avec un nom ou GPS similaire. Enregistrer quand même ?`,
+        "Enregistrer", () => { doQuickSave(e); });
+      return;
+    }
+    doQuickSave(e);
   });
   actions.appendChild(saveBtn);
 
@@ -1097,6 +1415,7 @@ function exportCSV() {
     "Réceptivité":e.receptivite,"RDV":e.rdv?`Oui - ${e.rdvDate}`:"Non","Notes B2B":e.notesB2B,
     "Profil":e.profile||"","Capture rapide":e.quickCapture?"Oui":"Non",
     "Photo lieu":e.photoLieu?"Oui":"Non","Photo menu":e.photoMenu?"Oui":"Non","Photo plats":e.photoPlats?"Oui":"Non",
+    "Mémo vocal terrain":e.voiceNotes?"Oui":"Non","Mémo vocal B2B":e.voiceB2B?"Oui":"Non",
   }));
 
   if(!rows.length) return;
@@ -1118,6 +1437,14 @@ function exportCSV() {
 function renderList() {
   const app = $("#app");
   app.innerHTML = "";
+
+  // Offline indicator
+  if(!state.isOnline) {
+    const offBar = h("div","offline-bar");
+    offBar.appendChild(h("div","online-dot off"));
+    offBar.appendChild(h("span",null,"Mode hors-ligne — Données sauvegardées localement"));
+    app.appendChild(offBar);
+  }
 
   // Header
   const hdr = h("div","header");
@@ -1143,12 +1470,25 @@ function renderList() {
   hdr.appendChild(right);
   app.appendChild(hdr);
 
+  // Stats bar
+  if(state.entries.length > 0) {
+    const stats = h("div","stats-row");
+    const nEnrich = state.entries.filter(e => e.quickCapture).length;
+    const potCounts = {};
+    C.potentiel.forEach(p => { potCounts[p.id] = 0; });
+    state.entries.forEach(e => { if(e.potentiel && potCounts[e.potentiel] !== undefined) potCounts[e.potentiel]++; });
+    const parts = [`${state.entries.length} lieux`];
+    C.potentiel.forEach(p => { if(potCounts[p.id] > 0) parts.push(`${potCounts[p.id]} ${p.e}`); });
+    if(nEnrich > 0) parts.push(`${nEnrich} à enrichir`);
+    stats.appendChild(h("div","stat-badge",parts.join(" · ")));
+    app.appendChild(stats);
+  }
+
   // Draft recovery banner
   const draft = loadDraft();
   if(draft && draft.entry) {
-    const isExisting = state.entries.some(x => x.id === draft.entry.id);
     const age = Date.now() - (draft.ts || 0);
-    if(age < 86400000) { // < 24h
+    if(age < 86400000) {
       const banner = h("div","draft-banner");
       const name = draft.entry.nom || "Sans nom";
       banner.appendChild(h("span","draft-banner-text",`📝 Brouillon : ${name}`));
@@ -1170,7 +1510,7 @@ function renderList() {
     }
   }
 
-  // Search + Filter
+  // Search + Filter + Sort
   if(state.entries.length > 0) {
     const sb = h("div","search-bar");
     const si = h("input","input",null,{type:"text",placeholder:"🔍  Rechercher un lieu..."});
@@ -1189,26 +1529,50 @@ function renderList() {
       fr.appendChild(fb);
     });
     app.appendChild(fr);
+
+    // Sort row
+    const sortRow = h("div","sort-row");
+    sortRow.appendChild(h("span","sort-label","Tri :"));
+    const sorts = [{id:"date",l:"Date"},{id:"name",l:"Nom"},{id:"potentiel",l:"Potentiel"},{id:"quartier",l:"Quartier"}];
+    sorts.forEach(s => {
+      const chip = h("button",`sort-chip${state.sortBy===s.id?" active":""}`,s.l);
+      chip.addEventListener("click", () => { state.sortBy = s.id; renderList(); });
+      sortRow.appendChild(chip);
+    });
+    app.appendChild(sortRow);
   }
 
-  // Entry list
+  // Entry list — filter + sort
   const list = h("div","list-scroll");
-  const filtered = state.entries.filter(e => {
+  let filtered = state.entries.filter(e => {
     const ms = !state.search || (e.nom||"").toLowerCase().includes(state.search.toLowerCase()) || (e.quartier||"").toLowerCase().includes(state.search.toLowerCase());
     const mp = !state.filterPot || e.potentiel === state.filterPot;
     return ms && mp;
   });
 
+  // Sort
+  const potOrder = ["pepite","coup_coeur","solide","moyen","skip",""];
+  filtered = [...filtered].sort((a, b) => {
+    switch(state.sortBy) {
+      case "name": return (a.nom||"").localeCompare(b.nom||"");
+      case "potentiel": return (potOrder.indexOf(a.potentiel||"")) - (potOrder.indexOf(b.potentiel||""));
+      case "quartier": return (a.quartier||"").localeCompare(b.quartier||"");
+      default: return (b.dateVisite||"").localeCompare(a.dateVisite||"");
+    }
+  });
+
   if(filtered.length === 0 && state.entries.length === 0) {
     const em = h("div","empty");
     em.appendChild(h("div","empty-ico","🍽️"));
-    em.appendChild(h("div","empty-txt",`Aucun lieu collecté pour le moment.<br><br>Appuie sur <span style="color:var(--accent);font-weight:700">+ Nouveau</span> pour commencer ta collecte.`));
+    em.appendChild(h("div","empty-txt",`Aucun lieu collecté pour le moment.<br><br>Appuie sur <span style="color:var(--accent);font-weight:700">⚡ Capturer</span> pour commencer.`));
     list.appendChild(em);
   } else if(filtered.length === 0) {
     list.appendChild(h("div","empty",`<div style="padding:40px;color:var(--muted)">Aucun résultat pour cette recherche</div>`));
   }
 
   filtered.forEach(entry => {
+    // Swipe wrapper
+    const wrap = h("div","card-swipe-wrap");
     const card = h("button","entry-card btn");
     const pot = C.potentiel.find(p=>p.id===entry.potentiel);
     const top = h("div",null,null);
@@ -1216,12 +1580,12 @@ function renderList() {
     const info = h("div",null,null);
     info.style.flex = "1";
     const nameRow = h("div",null,null);
-    nameRow.style.cssText = "display:flex;align-items:center;gap:6px";
+    nameRow.style.cssText = "display:flex;align-items:center;gap:6px;flex-wrap:wrap";
     if(pot) nameRow.appendChild(h("span",null,pot.e));
     nameRow.appendChild(h("span","entry-name",entry.nom||"Sans nom"));
     if(entry.quickCapture) nameRow.appendChild(h("span","badge-enrich","À enrichir"));
     info.appendChild(nameRow);
-    const meta = (entry.quartier||"") + (entry.quartier&&entry.types.length>0?" · ":"") + (entry.types||[]).join(", ");
+    const meta = (entry.quartier||"") + (entry.quartier&&(entry.types||[]).length>0?" · ":"") + (entry.types||[]).join(", ");
     if(meta) info.appendChild(h("div","entry-meta",meta));
     top.appendChild(info);
 
@@ -1234,13 +1598,38 @@ function renderList() {
 
     if(entry.accroche) card.appendChild(h("div","entry-accroche",`"${entry.accroche}"`));
 
+    // Swipe actions behind the card
+    const actionsDiv = h("div","card-swipe-actions");
+    const cloneBtn = h("button","card-swipe-action card-action-clone","📋");
+    cloneBtn.addEventListener("click", ev => { ev.stopPropagation(); duplicateEntry(entry); });
+    const shareBtn = h("button","card-swipe-action card-action-share","📤");
+    shareBtn.addEventListener("click", ev => { ev.stopPropagation(); shareEntry(entry); });
+    const delBtn = h("button","card-swipe-action card-action-delete","🗑️");
+    delBtn.addEventListener("click", ev => {
+      ev.stopPropagation();
+      showConfirm("Supprimer ?", `"${entry.nom||"Sans nom"}" sera supprimé.`, "Supprimer", () => {
+        state.entries = state.entries.filter(x => x.id !== entry.id);
+        save(); renderList();
+        showToast("Lieu supprimé","info","🗑️");
+      }, true);
+    });
+    actionsDiv.appendChild(cloneBtn);
+    actionsDiv.appendChild(shareBtn);
+    actionsDiv.appendChild(delBtn);
+    wrap.appendChild(actionsDiv);
+
+    // Setup swipe + click
+    const swipeState = setupCardSwipe(wrap, card);
     card.addEventListener("click", () => {
+      if(swipeState.isSwiped()) return;
       state.current = JSON.parse(JSON.stringify(entry));
       state.bloc = 0;
       state.view = "form";
       renderForm();
     });
-    list.appendChild(card);
+
+    wrap.appendChild(card);
+    list.appendChild(wrap);
   });
 
   app.appendChild(list);
@@ -1407,6 +1796,10 @@ function doSave() {
 // ─── Init ────────────────────────────────────────────────────────
 load();
 renderList();
+
+// Online/Offline detection
+window.addEventListener("online", () => { state.isOnline = true; if(state.view === "list") renderList(); });
+window.addEventListener("offline", () => { state.isOnline = false; if(state.view === "list") renderList(); showToast("Hors-ligne — Tes données sont safe","info","📡"); });
 </script>
 </body>
 </html>
