@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="SPAWT">
+<meta name="theme-color" content="#0C0C0E">
+<title>SPAWT Collecte</title>
+<link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxODAgMTgwIj48cmVjdCB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgcng9IjQwIiBmaWxsPSIjMEMwQzBFIi8+PHRleHQgeD0iOTAiIHk9IjEwNSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1zaXplPSI1MCIgZm9udC1mYW1pbHk9Im1vbm9zcGFjZSIgZm9udC13ZWlnaHQ9IjkwMCIgZmlsbD0iI0Y5NzMxNiI+U1A8L3RleHQ+PC9zdmc+">
+<link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiU1BBV1QgQ29sbGVjdGUiLCJzaG9ydF9uYW1lIjoiU1BBV1QiLCJzdGFydF91cmwiOiIuIiwiZGlzcGxheSI6InN0YW5kYWxvbmUiLCJiYWNrZ3JvdW5kX2NvbG9yIjoiIzBDMEMwRSIsInRoZW1lX2NvbG9yIjoiIzBDMEMwRSJ9">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+--bg:#0C0C0E;--surface:#161619;--card:#1A1A1F;--border:#2A2A30;
+--accent:#F97316;--accent-soft:rgba(249,115,22,0.15);
+--text:#E8E6E3;--muted:#8A8A8E;--dim:#5A5A5E;
+--danger:#EF4444;--white:#FFFFFF;
+--safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px);
+}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',sans-serif;font-size:14px;-webkit-font-smoothing:antialiased}
+input,textarea,select,button{font-family:inherit;font-size:inherit}
+input[type="date"],input[type="time"],input[type="number"],input[type="tel"]{-webkit-appearance:none;appearance:none}
+
+#app{height:100%;display:flex;flex-direction:column}
+
+/* ─── Header ─── */
+.header{display:flex;align-items:center;justify-content:space-between;padding:8px 16px;padding-top:calc(8px + var(--safe-top));border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0;min-height:52px}
+.header-title{font-size:22px;font-weight:800;color:var(--accent);letter-spacing:2px;font-family:'Courier New',monospace}
+.header-sub{font-size:11px;color:var(--dim);margin-top:1px}
+
+/* ─── Buttons ─── */
+.btn{border:none;cursor:pointer;border-radius:8px;font-weight:600;transition:opacity .15s;-webkit-user-select:none}
+.btn:active{opacity:.7}
+.btn-primary{background:var(--accent);color:var(--white);padding:8px 16px;font-size:13px;font-weight:700}
+.btn-icon{width:36px;height:36px;display:flex;align-items:center;justify-content:center;background:var(--surface);border:1px solid var(--border);font-size:16px;border-radius:8px}
+.btn-back{width:36px;height:36px;display:flex;align-items:center;justify-content:center;background:none;color:var(--muted);font-size:18px}
+.btn-save{width:36px;height:36px;display:flex;align-items:center;justify-content:center;background:var(--accent-soft);border:1px solid var(--accent);border-radius:8px;font-size:16px}
+.btn-secondary{width:100%;padding:10px;background:var(--surface);color:var(--accent);border:1px solid var(--border);font-size:13px;font-weight:600;margin-bottom:8px}
+.btn-nav{flex:1;padding:12px;background:var(--card);border:1px solid var(--border);color:var(--muted);font-size:13px;font-weight:600}
+.btn-nav-primary{flex:1;padding:12px;background:var(--accent);color:var(--white);font-size:13px;font-weight:700}
+.btn-danger{background:none;border:none;color:var(--danger);font-size:12px;padding:8px;opacity:.6}
+
+/* ─── Form Elements ─── */
+.field{margin-bottom:14px}
+.label{display:block;font-size:11px;font-weight:600;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px}
+.input{width:100%;padding:10px 12px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;outline:none}
+.input:focus{border-color:var(--accent)}
+textarea.input{resize:vertical;min-height:60px}
+
+/* ─── Chips ─── */
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{padding:6px 12px;border-radius:20px;border:1px solid var(--border);font-size:12px;font-weight:500;cursor:pointer;background:var(--surface);color:var(--muted);white-space:nowrap;transition:all .15s}
+.chip:active{opacity:.7}
+.chip.active{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+
+/* ─── Slider ─── */
+.slider-wrap{margin-bottom:18px}
+input[type="range"]{width:100%;accent-color:var(--accent);height:6px}
+.slider-labels{display:flex;justify-content:space-between;font-size:11px;color:var(--dim);margin-top:4px}
+.slider-val{color:var(--accent);font-weight:700;font-size:14px}
+
+/* ─── Stars ─── */
+.stars{display:flex;gap:8px;margin-bottom:14px}
+.star{background:none;border:none;font-size:28px;padding:0;cursor:pointer}
+.star.off{filter:grayscale(1) opacity(.3)}
+
+/* ─── Toggle ─── */
+.toggle-row{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.toggle-track{width:44px;height:24px;border-radius:12px;position:relative;cursor:pointer;transition:background .2s;border:none;flex-shrink:0}
+.toggle-track.on{background:var(--accent)}
+.toggle-track.off{background:var(--border)}
+.toggle-thumb{width:18px;height:18px;border-radius:9px;background:var(--white);position:absolute;top:3px;transition:left .2s}
+
+/* ─── Section Header ─── */
+.section-hdr{display:flex;align-items:center;gap:8px;margin-bottom:16px;margin-top:24px}
+.section-hdr h3{margin:0;color:var(--accent);font-size:14px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;white-space:nowrap}
+.section-hdr .line{flex:1;height:1px;background:var(--border)}
+
+/* ─── Entry Card ─── */
+.entry-card{width:100%;display:block;text-align:left;padding:14px 16px;background:var(--card);border:1px solid var(--border);border-radius:12px;margin-bottom:8px;cursor:pointer;transition:background .15s}
+.entry-card:active{background:var(--surface)}
+.entry-name{color:var(--text);font-weight:700;font-size:16px}
+.entry-meta{color:var(--muted);font-size:12px;margin-top:4px}
+.entry-date{color:var(--dim);font-size:11px}
+.entry-accroche{color:var(--accent);font-size:12px;font-style:italic;margin-top:6px;opacity:.8}
+
+/* ─── Bloc Nav ─── */
+.bloc-nav{display:flex;overflow-x:auto;padding:8px 12px;gap:4px;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0;-webkit-overflow-scrolling:touch}
+.bloc-tab{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 10px;border-radius:8px;border:none;background:none;color:var(--dim);cursor:pointer;min-width:52px;font-size:9px;font-weight:600}
+.bloc-tab.active{background:var(--accent-soft);color:var(--accent)}
+.bloc-tab .ico{font-size:16px}
+
+/* ─── Bottom Bar ─── */
+.bottom-bar{display:flex;gap:8px;padding:12px 16px;padding-bottom:calc(12px + var(--safe-bottom));background:var(--surface);border-top:1px solid var(--border);flex-shrink:0}
+
+/* ─── Scroll Area ─── */
+.scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:8px 16px;padding-bottom:80px}
+.list-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 16px;padding-bottom:80px}
+
+/* ─── Search ─── */
+.search-bar{padding:8px 16px 0}
+.filter-row{display:flex;gap:4px;overflow-x:auto;padding:6px 16px 10px;-webkit-overflow-scrolling:touch}
+.filter-chip{padding:4px 10px;border-radius:12px;border:1px solid var(--border);background:var(--surface);color:var(--muted);font-size:12px;cursor:pointer;white-space:nowrap}
+.filter-chip.active{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
+
+/* ─── Grid ─── */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.grid-time{display:grid;grid-template-columns:auto 1fr auto 1fr;gap:6px;align-items:center;margin-bottom:10px}
+.mini-label{font-size:12px;color:var(--muted);font-weight:600}
+
+/* ─── Empty ─── */
+.empty{text-align:center;padding:60px 20px}
+.empty-ico{font-size:48px;margin-bottom:16px}
+.empty-txt{color:var(--muted);font-size:14px;line-height:1.6}
+
+/* ─── Stats bar ─── */
+.stats-row{display:flex;gap:8px;padding:8px 16px;flex-wrap:wrap}
+.stat-badge{padding:3px 8px;border-radius:10px;font-size:11px;font-weight:600;background:var(--surface);border:1px solid var(--border);color:var(--muted)}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+// ═══════════════════════════════════════════════════════════════════
+// SPAWT FIELD COLLECTION PWA
+// ═══════════════════════════════════════════════════════════════════
+
+const STORAGE_KEY = "spawt-entries";
+
+// ─── Data Constants ──────────────────────────────────────────────
+const C = {
+  types: ["Maquis","Restaurant","Gargote","Street food","Bistrot","Fine dining","Snack"],
+  cuisines: ["Ivoirienne","Africaine (autre)","Française","Libanaise","Asiatique","Fast food","Fusion"],
+  digital: ["WhatsApp","Facebook","Instagram","Site web"],
+  menu: ["Carte physique photographiée","Ardoise","Verbal uniquement"],
+  paiements: ["Cash","Orange Money","MTN","Moov","Wave","CB","Virement"],
+  parking: ["Facile","Modéré","Difficile","Impossible"],
+  services: ["Livraison","À emporter","Climatisation","WiFi","Terrasse","Bar","Fumeurs acceptés"],
+  tags: [{id:"exact",e:"🎯",l:"Exact"},{id:"surprise",e:"🤩",l:"Surprise"},{id:"rapport",e:"💸",l:"Qualité-prix"},{id:"banal",e:"😐",l:"Banal"},{id:"decevant",e:"😞",l:"Décevant"}],
+  reco: ["Absolument","Oui","Peut-être","Non"],
+  clientele: ["Cadres/Pro","Étudiants","Familles","Couples","Solo","Touristes","Mixte"],
+  moments: ["Petit-déj","Déjeuner","Goûter","Dîner","Tard dans la nuit"],
+  affluence: ["Vide","Calme","Modérée","Bondé","File d'attente"],
+  sonore: ["Calme","Ambiance musicale","Animé","Bruyant"],
+  proprete: ["Impeccable","Correcte","Passable","Problématique"],
+  accueil: ["Chaleureux","Pro","Distant","Désagréable"],
+  potentiel: [{id:"pepite",e:"🔥",l:"PÉPITE"},{id:"coup_coeur",e:"❤️",l:"COUP DE CŒUR"},{id:"solide",e:"✅",l:"SOLIDE"},{id:"moyen",e:"⚠️",l:"MOYEN"},{id:"skip",e:"❌",l:"SKIP"}],
+  receptivite: ["Très intéressé","Ouvert","Sceptique","Refus"],
+  fonction: ["Propriétaire","Gérant","Responsable"],
+  materiel: ["Flyer","Pitch deck","Carte de visite"],
+};
+
+// ─── State ───────────────────────────────────────────────────────
+let state = {
+  view: "list",
+  entries: [],
+  current: null,
+  bloc: 0,
+  search: "",
+  filterPot: "",
+};
+
+function emptyEntry() {
+  return {
+    id: Date.now().toString(36) + Math.random().toString(36).slice(2,7),
+    ts: new Date().toISOString(),
+    nom:"",adresse:"",quartier:"",gpsLat:"",gpsLong:"",dateVisite:new Date().toISOString().slice(0,10),spawter:"",
+    telephone:"",digital:[],urlHandle:"",
+    types:[],autreType:"",specs:["","",""],cuisines:[],autreCuisine:"",platsSignature:"",
+    ecoMin:"",ecoMax:"",moyMin:"",moyMax:"",premMin:"",premMax:"",boissMin:"",boissMax:"",menuType:[],
+    budget:6,budgetEst:"",cadence:6,tempsAtt:"",ambiance:6,ambianceN:"",sociabilite:6,sociabiliteN:"",notoriete:6,notorieteN:"",
+    hLVde:"",hLVa:"",hSde:"",hSa:"",hDde:"",hDa:"",dimFerme:false,continu:"",coupures:"",joursFerm:"",
+    capInt:"",capExt:"",paiements:[],parking:"",parkingN:"",services:[],
+    tested:false,platsTestes:"",budgetTest:"",eval:3,forts:["","",""],faibles:["","",""],
+    tags:[],reco:"",accroche:"",
+    clientele:[],moments:[],affluence:"",sonore:"",proprete:"",serveurs:"",accueil:"",potentiel:"",notes:"",
+    contactEtabli:"",contactNom:"",fonction:"",receptivite:"",rdv:false,rdvDate:"",materiel:[],notesB2B:"",
+  };
+}
+
+// ─── Persistence ─────────────────────────────────────────────────
+function save() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state.entries)); } catch(e) { console.error(e); }
+}
+function load() {
+  try { const d = localStorage.getItem(STORAGE_KEY); if(d) state.entries = JSON.parse(d); } catch(e) {}
+}
+
+// ─── Helpers ─────────────────────────────────────────────────────
+const $ = (s,p) => (p||document).querySelector(s);
+const $$ = (s,p) => [...(p||document).querySelectorAll(s)];
+const h = (tag, cls, html, attrs) => {
+  const el = document.createElement(tag);
+  if(cls) el.className = cls;
+  if(html !== undefined && html !== null) el.innerHTML = html;
+  if(attrs) Object.entries(attrs).forEach(([k,v]) => {
+    if(k.startsWith("on")) el.addEventListener(k.slice(2).toLowerCase(), v);
+    else el.setAttribute(k, v);
+  });
+  return el;
+};
+const upd = (field, val) => { state.current[field] = val; renderForm(); };
+
+// ─── Render Helpers ──────────────────────────────────────────────
+function mkInput(label, field, type="text", placeholder="") {
+  const d = h("div","field");
+  if(label) d.appendChild(h("label","label",label));
+  const inp = h("input","input",null,{type,value:state.current[field]||"",placeholder});
+  inp.addEventListener("input", e => { state.current[field] = e.target.value; });
+  d.appendChild(inp);
+  return d;
+}
+
+function mkTextarea(label, field, placeholder="", rows=3) {
+  const d = h("div","field");
+  if(label) d.appendChild(h("label","label",label));
+  const ta = h("textarea","input",null,{placeholder,rows});
+  ta.value = state.current[field] || "";
+  ta.addEventListener("input", e => { state.current[field] = e.target.value; });
+  d.appendChild(ta);
+  return d;
+}
+
+function mkArrayInput(label, field, index) {
+  const d = h("div","field");
+  if(label) d.appendChild(h("label","label",label));
+  const inp = h("input","input",null,{type:"text",value:(state.current[field]||[])[index]||""});
+  inp.addEventListener("input", e => {
+    const arr = [...(state.current[field]||[])];
+    arr[index] = e.target.value;
+    state.current[field] = arr;
+  });
+  d.appendChild(inp);
+  return d;
+}
+
+function mkChips(label, options, field, multi=true) {
+  const d = h("div","field");
+  if(label) d.appendChild(h("label","label",label));
+  const row = h("div","chips");
+  options.forEach(opt => {
+    const isObj = typeof opt === "object";
+    const val = isObj ? opt.id : opt;
+    const display = isObj ? `${opt.e} ${opt.l}` : opt;
+    const cur = state.current[field];
+    const active = multi ? (cur||[]).includes(val) : cur === val;
+    const chip = h("button", `chip${active?" active":""}`, display);
+    chip.addEventListener("click", () => {
+      if(multi) {
+        const arr = [...(state.current[field]||[])];
+        const idx = arr.indexOf(val);
+        if(idx>=0) arr.splice(idx,1); else arr.push(val);
+        state.current[field] = arr;
+      } else {
+        state.current[field] = state.current[field] === val ? "" : val;
+      }
+      renderForm();
+    });
+    row.appendChild(chip);
+  });
+  d.appendChild(row);
+  return d;
+}
+
+function mkSlider(label, field, leftL, rightL) {
+  const d = h("div","slider-wrap");
+  if(label) d.appendChild(h("label","label",label));
+  const inp = h("input",null,null,{type:"range",min:"1",max:"12",value:String(state.current[field]||6)});
+  inp.addEventListener("input", e => { state.current[field] = Number(e.target.value); renderForm(); });
+  d.appendChild(inp);
+  const labels = h("div","slider-labels",`<span>${leftL}</span><span class="slider-val">${state.current[field]||6}</span><span>${rightL}</span>`);
+  d.appendChild(labels);
+  return d;
+}
+
+function mkStars(field) {
+  const d = h("div","stars");
+  for(let i=1;i<=5;i++){
+    const s = h("button",`star${i<=state.current[field]?"":""}`,"⭐");
+    if(i > state.current[field]) s.classList.add("off");
+    s.addEventListener("click", () => { state.current[field] = i; renderForm(); });
+    d.appendChild(s);
+  }
+  return d;
+}
+
+function mkToggle(label, field) {
+  const d = h("div","toggle-row");
+  const on = !!state.current[field];
+  const track = h("button",`toggle-track ${on?"on":"off"}`);
+  const thumb = h("div","toggle-thumb");
+  thumb.style.left = on ? "23px" : "3px";
+  track.appendChild(thumb);
+  track.addEventListener("click", () => { state.current[field] = !state.current[field]; renderForm(); });
+  d.appendChild(track);
+  d.appendChild(h("span",null,label));
+  return d;
+}
+
+function mkSection(title, icon) {
+  const d = h("div","section-hdr");
+  d.appendChild(h("span",null,icon));
+  d.appendChild(h("h3",null,title));
+  d.appendChild(h("div","line"));
+  return d;
+}
+
+// ─── Bloc Renderers ──────────────────────────────────────────────
+function renderBloc0(container) {
+  const e = state.current;
+  container.appendChild(mkSection("Identification","📍"));
+  container.appendChild(mkInput("Nom établissement *","nom","text","Ex: Chez Tantie Rose"));
+  container.appendChild(mkInput("Adresse complète *","adresse"));
+  container.appendChild(mkInput("Quartier / Zone *","quartier","text","Ex: Cocody Riviera"));
+
+  const gpsGrid = h("div","grid2");
+  gpsGrid.appendChild(mkInput("GPS Lat","gpsLat","number"));
+  gpsGrid.appendChild(mkInput("GPS Long","gpsLong","number"));
+  container.appendChild(gpsGrid);
+
+  const gpsBtn = h("button","btn btn-secondary","📡 Localisation GPS auto");
+  gpsBtn.addEventListener("click", () => {
+    if(navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(pos => {
+        state.current.gpsLat = pos.coords.latitude.toFixed(6);
+        state.current.gpsLong = pos.coords.longitude.toFixed(6);
+        renderForm();
+      }, err => alert("GPS indisponible: " + err.message), {enableHighAccuracy:true});
+    }
+  });
+  container.appendChild(gpsBtn);
+
+  container.appendChild(mkInput("Date visite *","dateVisite","date"));
+  container.appendChild(mkInput("Spawter collecteur *","spawter"));
+  container.appendChild(mkInput("Téléphone","telephone","tel"));
+  container.appendChild(mkChips("Présence digitale", C.digital, "digital"));
+  container.appendChild(mkInput("URL / Handle","urlHandle"));
+}
+
+function renderBloc1(container) {
+  container.appendChild(mkSection("Typologie & Offre","🍽️"));
+  container.appendChild(mkChips("Type d'établissement", C.types, "types"));
+  container.appendChild(mkInput("Autre type","autreType"));
+  for(let i=0;i<3;i++) container.appendChild(mkArrayInput(`Spécialité ${i+1}`,"specs",i));
+  container.appendChild(mkChips("Cuisine dominante", C.cuisines, "cuisines"));
+  container.appendChild(mkInput("Autre cuisine","autreCuisine"));
+  container.appendChild(mkTextarea("Plats signature observés","platsSignature"));
+
+  container.appendChild(h("label","label","Grille tarifaire (FCFA)"));
+  const g = h("div","grid2");
+  g.appendChild(mkInput("Éco min","ecoMin","number"));
+  g.appendChild(mkInput("Éco max","ecoMax","number"));
+  g.appendChild(mkInput("Moyen min","moyMin","number"));
+  g.appendChild(mkInput("Moyen max","moyMax","number"));
+  g.appendChild(mkInput("Premium min","premMin","number"));
+  g.appendChild(mkInput("Premium max","premMax","number"));
+  g.appendChild(mkInput("Boissons min","boissMin","number"));
+  g.appendChild(mkInput("Boissons max","boissMax","number"));
+  container.appendChild(g);
+  container.appendChild(mkChips("Menu", C.menu, "menuType"));
+}
+
+function renderBloc2(container) {
+  container.appendChild(mkSection("ADN Quantifié","🧬"));
+  container.appendChild(mkSlider("BUDGET (repas complet 1 pers)","budget","<2000F",">15000F"));
+  container.appendChild(mkInput("Estimation FCFA","budgetEst","number"));
+  container.appendChild(mkSlider("CADENCE (vitesse service)","cadence","Très lent","Ultra rapide"));
+  container.appendChild(mkInput("Temps d'attente (min)","tempsAtt","number"));
+  container.appendChild(mkSlider("AMBIANCE (formalité)","ambiance","Décontracté","Très formel"));
+  container.appendChild(mkInput("Notes ambiance","ambianceN"));
+  container.appendChild(mkSlider("SOCIABILITÉ","sociabilite","Solo-friendly","Groupes"));
+  container.appendChild(mkInput("Notes sociabilité","sociabiliteN"));
+  container.appendChild(mkSlider("NOTORIÉTÉ","notoriete","Bouche-à-oreille","Institution"));
+  container.appendChild(mkInput("Notes notoriété","notorieteN"));
+}
+
+function renderBloc3(container) {
+  container.appendChild(mkSection("Profil Opérationnel","⏰"));
+  container.appendChild(h("label","label","Horaires"));
+
+  const g = h("div","grid-time");
+  g.appendChild(h("span","mini-label","L-V"));
+  g.appendChild(mkInput(null,"hLVde","time"));
+  g.appendChild(h("span","mini-label","à"));
+  g.appendChild(mkInput(null,"hLVa","time"));
+  g.appendChild(h("span","mini-label","Sam"));
+  g.appendChild(mkInput(null,"hSde","time"));
+  g.appendChild(h("span","mini-label","à"));
+  g.appendChild(mkInput(null,"hSa","time"));
+  g.appendChild(h("span","mini-label","Dim"));
+  g.appendChild(mkInput(null,"hDde","time"));
+  g.appendChild(h("span","mini-label","à"));
+  g.appendChild(mkInput(null,"hDa","time"));
+  container.appendChild(g);
+
+  container.appendChild(mkToggle("Dimanche fermé","dimFerme"));
+  container.appendChild(mkChips("Service continu?",["Oui","Non"],"continu",false));
+  if(state.current.continu==="Non") container.appendChild(mkInput("Coupures","coupures"));
+  container.appendChild(mkInput("Jours de fermeture hebdo","joursFerm"));
+
+  const cap = h("div","grid2");
+  cap.appendChild(mkInput("Places intérieur","capInt","number"));
+  cap.appendChild(mkInput("Places extérieur","capExt","number"));
+  container.appendChild(cap);
+
+  container.appendChild(mkChips("Paiements acceptés", C.paiements, "paiements"));
+  container.appendChild(mkChips("Parking", C.parking, "parking", false));
+  container.appendChild(mkInput("Précisions parking","parkingN"));
+  container.appendChild(mkChips("Services additionnels", C.services, "services"));
+}
+
+function renderBloc4(container) {
+  container.appendChild(mkSection("Évaluation Spawter","⭐"));
+  container.appendChild(mkToggle("Test effectué","tested"));
+
+  if(state.current.tested) {
+    container.appendChild(mkInput("Plat(s) testé(s)","platsTestes"));
+    container.appendChild(mkInput("Budget test (FCFA)","budgetTest","number"));
+    container.appendChild(h("label","label","Évaluation globale"));
+    container.appendChild(mkStars("eval"));
+    for(let i=0;i<3;i++) container.appendChild(mkArrayInput(`Point fort ${i+1}`,"forts",i));
+    for(let i=0;i<3;i++) container.appendChild(mkArrayInput(`Point faible ${i+1}`,"faibles",i));
+  }
+
+  container.appendChild(mkChips("Tags émotionnels", C.tags, "tags"));
+  container.appendChild(mkChips("Recommandable?", C.reco, "reco", false));
+  container.appendChild(mkInput("Phrase d'accroche (pour l'app)","accroche"));
+}
+
+function renderBloc5(container) {
+  container.appendChild(mkSection("Intelligence Terrain","🔍"));
+  container.appendChild(mkChips("Clientèle observée", C.clientele, "clientele"));
+  container.appendChild(mkChips("Moment optimal", C.moments, "moments"));
+  container.appendChild(mkChips("Affluence observée", C.affluence, "affluence", false));
+  container.appendChild(mkChips("Niveau sonore", C.sonore, "sonore", false));
+  container.appendChild(mkChips("Propreté", C.proprete, "proprete", false));
+  container.appendChild(mkInput("Nombre de serveurs","serveurs","number"));
+  container.appendChild(mkChips("Accueil", C.accueil, "accueil", false));
+  container.appendChild(mkChips("Potentiel Spawt", C.potentiel, "potentiel", false));
+  container.appendChild(mkTextarea("Notes libres terrain","notes","",4));
+}
+
+function renderBloc6(container) {
+  container.appendChild(mkSection("Approche B2B","🤝"));
+  container.appendChild(mkChips("Contact établi?",["Oui","Non","À recontacter"],"contactEtabli",false));
+
+  if(state.current.contactEtabli==="Oui") {
+    container.appendChild(mkInput("Contact nom","contactNom"));
+    container.appendChild(mkChips("Fonction", C.fonction, "fonction", false));
+    container.appendChild(mkChips("Réceptivité", C.receptivite, "receptivite", false));
+    container.appendChild(mkToggle("RDV planifié","rdv"));
+    if(state.current.rdv) container.appendChild(mkInput("Date RDV","rdvDate","date"));
+    container.appendChild(mkChips("Matériel laissé", C.materiel, "materiel"));
+  }
+
+  container.appendChild(mkTextarea("Notes approche commerciale","notesB2B","",3));
+}
+
+const BLOCS = [
+  {t:"Identification",i:"📍",r:renderBloc0},
+  {t:"Typologie",i:"🍽️",r:renderBloc1},
+  {t:"ADN",i:"🧬",r:renderBloc2},
+  {t:"Opérations",i:"⏰",r:renderBloc3},
+  {t:"Évaluation",i:"⭐",r:renderBloc4},
+  {t:"Terrain",i:"🔍",r:renderBloc5},
+  {t:"B2B",i:"🤝",r:renderBloc6},
+];
+
+// ─── CSV Export ──────────────────────────────────────────────────
+function exportCSV() {
+  const esc = v => { const s=String(v??""); return s.includes(",")||s.includes('"')||s.includes("\n") ? `"${s.replace(/"/g,'""')}"` : s; };
+  const rows = state.entries.map(e => ({
+    "Nom":e.nom,"Adresse":e.adresse,"Quartier":e.quartier,"GPS Lat":e.gpsLat,"GPS Long":e.gpsLong,
+    "Date visite":e.dateVisite,"Spawter":e.spawter,"Téléphone":e.telephone,
+    "Présence digitale":(e.digital||[]).join("|"),"URL":e.urlHandle,
+    "Type":(e.types||[]).join("|"),"Spécialité 1":(e.specs||[])[0]||"","Spécialité 2":(e.specs||[])[1]||"","Spécialité 3":(e.specs||[])[2]||"",
+    "Cuisine":(e.cuisines||[]).join("|"),"Plats signature":e.platsSignature,
+    "Éco min":e.ecoMin,"Éco max":e.ecoMax,"Moyen min":e.moyMin,"Moyen max":e.moyMax,
+    "Premium min":e.premMin,"Premium max":e.premMax,"Boissons min":e.boissMin,"Boissons max":e.boissMax,
+    "Menu":(e.menuType||[]).join("|"),
+    "Budget /12":e.budget,"Budget FCFA":e.budgetEst,"Cadence /12":e.cadence,"Temps attente":e.tempsAtt,
+    "Ambiance /12":e.ambiance,"Ambiance notes":e.ambianceN,"Sociabilité /12":e.sociabilite,"Sociabilité notes":e.sociabiliteN,
+    "Notoriété /12":e.notoriete,"Notoriété notes":e.notorieteN,
+    "Horaires L-V":e.hLVde&&e.hLVa?`${e.hLVde}-${e.hLVa}`:"","Horaires Sam":e.hSde&&e.hSa?`${e.hSde}-${e.hSa}`:"",
+    "Horaires Dim":e.dimFerme?"Fermé":(e.hDde&&e.hDa?`${e.hDde}-${e.hDa}`:""),
+    "Service continu":e.continu,"Places int.":e.capInt,"Places ext.":e.capExt,
+    "Paiements":(e.paiements||[]).join("|"),"Parking":e.parking,"Services":(e.services||[]).join("|"),
+    "Test":e.tested?"Oui":"Non","Plats testés":e.platsTestes,"Budget test":e.budgetTest,
+    "Évaluation /5":e.tested?e.eval:"",
+    "Fort 1":(e.forts||[])[0]||"","Fort 2":(e.forts||[])[1]||"","Fort 3":(e.forts||[])[2]||"",
+    "Faible 1":(e.faibles||[])[0]||"","Faible 2":(e.faibles||[])[1]||"","Faible 3":(e.faibles||[])[2]||"",
+    "Tags":(e.tags||[]).join("|"),"Recommandable":e.reco,"Accroche":e.accroche,
+    "Clientèle":(e.clientele||[]).join("|"),"Moment":(e.moments||[]).join("|"),
+    "Affluence":e.affluence,"Sonore":e.sonore,"Propreté":e.proprete,
+    "Serveurs":e.serveurs,"Accueil":e.accueil,"Potentiel":e.potentiel,"Notes":e.notes,
+    "Contact B2B":e.contactEtabli,"Contact nom":e.contactNom,"Fonction":e.fonction,
+    "Réceptivité":e.receptivite,"RDV":e.rdv?`Oui - ${e.rdvDate}`:"Non","Notes B2B":e.notesB2B,
+  }));
+
+  if(!rows.length) return;
+  const hdr = Object.keys(rows[0]);
+  const csv = "\uFEFF" + [hdr.map(esc).join(","), ...rows.map(r=>hdr.map(k=>esc(r[k])).join(","))].join("\n");
+  const blob = new Blob([csv], {type:"text/csv;charset=utf-8;"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `SPAWT_${new Date().toISOString().slice(0,10)}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// ─── Render: List View ───────────────────────────────────────────
+function renderList() {
+  const app = $("#app");
+  app.innerHTML = "";
+
+  // Header
+  const hdr = h("div","header");
+  const left = h("div");
+  left.appendChild(h("div","header-title","SPAWT"));
+  left.appendChild(h("div","header-sub",`Collecte Terrain · ${state.entries.length} lieu${state.entries.length!==1?"x":""}`));
+  hdr.appendChild(left);
+
+  const right = h("div",null,null);
+  right.style.cssText = "display:flex;gap:8px;align-items:center";
+  if(state.entries.length > 0) {
+    const expBtn = h("button","btn btn-icon","📊");
+    expBtn.addEventListener("click", exportCSV);
+    right.appendChild(expBtn);
+  }
+  const newBtn = h("button","btn btn-primary","+ Nouveau");
+  newBtn.addEventListener("click", () => {
+    state.current = emptyEntry();
+    state.bloc = 0;
+    state.view = "form";
+    renderForm();
+  });
+  right.appendChild(newBtn);
+  hdr.appendChild(right);
+  app.appendChild(hdr);
+
+  // Search + Filter
+  if(state.entries.length > 0) {
+    const sb = h("div","search-bar");
+    const si = h("input","input",null,{type:"text",placeholder:"Rechercher un lieu..."});
+    si.value = state.search;
+    si.addEventListener("input", e => { state.search = e.target.value; renderList(); });
+    sb.appendChild(si);
+    app.appendChild(sb);
+
+    const fr = h("div","filter-row");
+    const allBtn = h("button",`filter-chip${state.filterPot===""?" active":""}`,"Tous");
+    allBtn.addEventListener("click", () => { state.filterPot = ""; renderList(); });
+    fr.appendChild(allBtn);
+    C.potentiel.forEach(p => {
+      const fb = h("button",`filter-chip${state.filterPot===p.id?" active":""}`,p.e);
+      fb.addEventListener("click", () => { state.filterPot = state.filterPot===p.id?"":p.id; renderList(); });
+      fr.appendChild(fb);
+    });
+    app.appendChild(fr);
+  }
+
+  // Entry list
+  const list = h("div","list-scroll");
+  const filtered = state.entries.filter(e => {
+    const ms = !state.search || (e.nom||"").toLowerCase().includes(state.search.toLowerCase()) || (e.quartier||"").toLowerCase().includes(state.search.toLowerCase());
+    const mp = !state.filterPot || e.potentiel === state.filterPot;
+    return ms && mp;
+  });
+
+  if(filtered.length === 0 && state.entries.length === 0) {
+    const em = h("div","empty");
+    em.appendChild(h("div","empty-ico","🍽️"));
+    em.appendChild(h("div","empty-txt",`Aucun lieu collecté.<br>Appuie sur <span style="color:var(--accent)">+ Nouveau</span> pour commencer.`));
+    list.appendChild(em);
+  } else if(filtered.length === 0) {
+    list.appendChild(h("div","empty",`<div style="padding:40px;color:var(--muted)">Aucun résultat</div>`));
+  }
+
+  filtered.forEach(entry => {
+    const card = h("button","entry-card btn");
+    const pot = C.potentiel.find(p=>p.id===entry.potentiel);
+    const top = h("div",null,null);
+    top.style.cssText = "display:flex;justify-content:space-between;align-items:flex-start";
+    const info = h("div",null,null);
+    info.style.flex = "1";
+    const nameRow = h("div",null,null);
+    nameRow.style.cssText = "display:flex;align-items:center;gap:6px";
+    if(pot) nameRow.appendChild(h("span",null,pot.e));
+    nameRow.appendChild(h("span","entry-name",entry.nom||"Sans nom"));
+    info.appendChild(nameRow);
+    const meta = (entry.quartier||"") + (entry.quartier&&entry.types.length>0?" · ":"") + (entry.types||[]).join(", ");
+    if(meta) info.appendChild(h("div","entry-meta",meta));
+    top.appendChild(info);
+
+    const right = h("div",null,null);
+    right.style.cssText = "display:flex;flex-direction:column;align-items:flex-end;gap:4px";
+    right.appendChild(h("span","entry-date",entry.dateVisite));
+    if(entry.tested && entry.eval) right.appendChild(h("span",null,"⭐".repeat(entry.eval)));
+    top.appendChild(right);
+    card.appendChild(top);
+
+    if(entry.accroche) card.appendChild(h("div","entry-accroche",`"${entry.accroche}"`));
+
+    card.addEventListener("click", () => {
+      state.current = JSON.parse(JSON.stringify(entry));
+      state.bloc = 0;
+      state.view = "form";
+      renderForm();
+    });
+    list.appendChild(card);
+  });
+
+  app.appendChild(list);
+}
+
+// ─── Render: Form View ───────────────────────────────────────────
+function renderForm() {
+  const app = $("#app");
+  app.innerHTML = "";
+  const e = state.current;
+
+  // Header
+  const hdr = h("div","header");
+  const backBtn = h("button","btn btn-back","✕");
+  backBtn.addEventListener("click", () => {
+    if(confirm("Quitter sans sauvegarder?")) { state.view = "list"; renderList(); }
+  });
+  hdr.appendChild(backBtn);
+
+  const center = h("div",null,null);
+  center.style.cssText = "flex:1;text-align:center";
+  center.appendChild(h("div",null,`<span style="font-weight:700;font-size:14px">${e.nom||"Nouveau lieu"}</span>`));
+  center.appendChild(h("div",null,`<span style="font-size:11px;color:var(--dim)">${BLOCS[state.bloc].i} ${BLOCS[state.bloc].t}</span>`));
+  hdr.appendChild(center);
+
+  const saveBtn = h("button","btn btn-save","💾");
+  saveBtn.addEventListener("click", doSave);
+  hdr.appendChild(saveBtn);
+  app.appendChild(hdr);
+
+  // Bloc nav
+  const nav = h("div","bloc-nav");
+  BLOCS.forEach((b, i) => {
+    const tab = h("button",`bloc-tab${i===state.bloc?" active":""}`,`<span class="ico">${b.i}</span>${b.t}`);
+    tab.addEventListener("click", () => { state.bloc = i; renderForm(); });
+    nav.appendChild(tab);
+  });
+  app.appendChild(nav);
+
+  // Form content
+  const scroll = h("div","scroll");
+  scroll.id = "form-scroll";
+  BLOCS[state.bloc].r(scroll);
+  app.appendChild(scroll);
+
+  // Delete button for existing entries
+  const isExisting = state.entries.some(x => x.id === e.id);
+  if(isExisting) {
+    const delWrap = h("div",null,null);
+    delWrap.style.cssText = "text-align:center;padding:16px 0 8px";
+    const delBtn = h("button","btn btn-danger","Supprimer ce lieu");
+    delBtn.addEventListener("click", () => {
+      if(confirm("Supprimer ce lieu?")) {
+        state.entries = state.entries.filter(x => x.id !== e.id);
+        save();
+        state.view = "list";
+        renderList();
+      }
+    });
+    delWrap.appendChild(delBtn);
+    scroll.appendChild(delWrap);
+  }
+
+  // Bottom nav
+  const bottom = h("div","bottom-bar");
+  const prevBtn = h("button","btn btn-nav","← Précédent");
+  if(state.bloc === 0) prevBtn.style.opacity = ".3";
+  prevBtn.addEventListener("click", () => {
+    if(state.bloc > 0) { state.bloc--; renderForm(); }
+  });
+  bottom.appendChild(prevBtn);
+
+  if(state.bloc < BLOCS.length - 1) {
+    const nextBtn = h("button","btn btn-nav-primary","Suivant →");
+    nextBtn.addEventListener("click", () => { state.bloc++; renderForm(); });
+    bottom.appendChild(nextBtn);
+  } else {
+    const saveBtn2 = h("button","btn btn-nav-primary","✓ Sauvegarder");
+    saveBtn2.addEventListener("click", doSave);
+    bottom.appendChild(saveBtn2);
+  }
+  app.appendChild(bottom);
+}
+
+function doSave() {
+  const idx = state.entries.findIndex(x => x.id === state.current.id);
+  if(idx >= 0) {
+    state.entries[idx] = state.current;
+  } else {
+    state.entries.unshift(state.current);
+  }
+  save();
+  state.view = "list";
+  renderList();
+}
+
+// ─── Init ────────────────────────────────────────────────────────
+load();
+renderList();
+</script>
+</body>
+</html>
