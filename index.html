@@ -267,6 +267,105 @@ input[type="range"]::-moz-range-thumb{width:26px;height:26px;border-radius:13px;
 .suggest-row{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
 .suggest-chip{padding:3px 8px;border-radius:10px;border:1px dashed var(--border);font-size:11px;color:var(--dim);cursor:pointer;background:none;transition:all .15s}
 .suggest-chip:active{border-color:var(--accent);color:var(--accent)}
+
+/* ═══════════════════════════════════════════════════════════════
+   RESPONSIVE — Tablet & Desktop
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ─── Small desktop / large tablet (640px+) — phone frame ─── */
+@media (min-width:640px){
+  body{background:#EEECEA}
+  #app{max-width:500px;margin:0 auto;box-shadow:0 0 60px rgba(0,0,0,.07);border-left:1px solid var(--border);border-right:1px solid var(--border)}
+}
+
+/* ─── Tablet landscape / small desktop (768px+) — 2 columns ── */
+@media (min-width:768px){
+  #app{max-width:860px}
+  .header{padding:14px 28px;min-height:60px}
+  .header-title{font-size:24px}
+  .search-bar{padding:14px 28px 0}
+  .filter-row{padding:10px 28px}
+  .sort-row{padding:6px 28px 10px}
+  .stats-row{padding:10px 28px}
+  .bloc-nav{padding:10px 24px;gap:6px}
+  .bloc-tab{min-width:68px;padding:10px 14px;font-size:11px}
+  .bloc-tab .ico{font-size:20px}
+  .bottom-bar{padding:14px 28px;padding-bottom:calc(14px + var(--safe-bottom))}
+
+  /* List — 2 column grid */
+  .list-scroll{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;padding:16px 28px 80px;align-content:start}
+  .list-scroll .empty{grid-column:1/-1}
+  .list-scroll .card-swipe-wrap{margin-bottom:0}
+  .entry-card{padding:18px}
+  .entry-name{font-size:17px}
+
+  /* Form — breathing room */
+  .scroll{padding:28px 36px}
+  .field-group{padding:22px 22px 6px;margin-bottom:18px}
+  .grid2{gap:16px}
+  .chips{gap:10px}
+  .chip{padding:9px 16px;font-size:13px}
+  .profiles-row{gap:12px}
+  .profile-card{min-width:100px;padding:16px 18px}
+
+  /* Quick capture — centered */
+  .quick-input{max-width:500px;margin:0 auto;display:block;font-size:22px}
+
+  /* Draft banner wider */
+  .draft-banner{padding:14px 28px}
+}
+
+/* ─── Desktop (1100px+) — 3 columns, form max-width ────────── */
+@media (min-width:1100px){
+  #app{max-width:1100px}
+  .header{padding:16px 36px}
+  .search-bar{padding:16px 36px 0}
+  .filter-row{padding:10px 36px}
+  .sort-row{padding:6px 36px 10px}
+  .stats-row{padding:12px 36px}
+  .bottom-bar{padding:16px 36px;padding-bottom:calc(16px + var(--safe-bottom))}
+  .draft-banner{padding:14px 36px}
+
+  /* List — 3 column grid */
+  .list-scroll{grid-template-columns:repeat(3,1fr);gap:16px;padding:20px 36px 80px}
+  .entry-card{padding:20px}
+
+  /* Form — constrained width, centered for readability */
+  .scroll{padding:32px calc((100% - 720px) / 2);max-width:none}
+  .field-group{padding:24px 24px 8px}
+  .slider-wrap{max-width:600px}
+
+  /* Bloc nav more spacious */
+  .bloc-nav{padding:12px 36px;gap:8px}
+  .bloc-tab{min-width:80px;padding:12px 16px;font-size:12px}
+}
+
+/* ─── Wide desktop (1400px+) — refined spacing ─────────────── */
+@media (min-width:1400px){
+  #app{max-width:1280px}
+  .list-scroll{grid-template-columns:repeat(3,1fr);gap:18px;padding:24px 48px 80px}
+  .header{padding:18px 48px}
+  .search-bar{padding:18px 48px 0}
+  .filter-row{padding:12px 48px}
+  .sort-row{padding:8px 48px 12px}
+  .stats-row{padding:14px 48px}
+}
+
+/* ─── Hover states for desktop (pointer devices) ───────────── */
+@media (hover:hover){
+  .btn:hover{opacity:.85}
+  .chip:hover{border-color:var(--accent);color:var(--accent)}
+  .entry-card:hover{box-shadow:var(--shadow-md);border-color:var(--accent)}
+  .profile-card:hover{border-color:var(--accent);box-shadow:var(--shadow-md)}
+  .filter-chip:hover{border-color:var(--accent);color:var(--accent)}
+  .sort-chip:hover{border-color:var(--accent);color:var(--accent)}
+  .photo-btn:hover{border-color:var(--accent);color:var(--accent)}
+  .voice-btn:hover{border-color:var(--accent);color:var(--text)}
+  .bloc-tab:hover{color:var(--accent);background:var(--accent-soft)}
+  .suggest-chip:hover{border-color:var(--accent);color:var(--accent)}
+  .card-swipe-action:hover{opacity:.85}
+  .btn-nav:hover{border-color:var(--accent);color:var(--accent)}
+}
 </style>
 </head>
 <body>
