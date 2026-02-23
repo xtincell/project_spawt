@@ -186,6 +186,49 @@ input[type="range"]::-moz-range-thumb{width:26px;height:26px;border-radius:13px;
 .summary-key{color:var(--muted)}
 .summary-val{color:var(--text);font-weight:600;text-align:right;max-width:60%}
 .summary-val.empty{color:var(--dim);font-weight:400;font-style:italic}
+
+/* ─── Quick Capture ─── */
+.quick-header{text-align:center;padding:24px 0 12px}
+.quick-title{font-size:24px;font-weight:800;color:var(--accent);letter-spacing:1px}
+.quick-sub{font-size:13px;color:var(--muted);margin-top:6px}
+.quick-input{width:100%;padding:16px;background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:20px;font-weight:700;outline:none;transition:border-color .2s;text-align:center}
+.quick-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.quick-input::placeholder{color:var(--dim);font-weight:400;font-size:16px}
+.quick-section{margin-top:22px;margin-bottom:10px;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.quick-gps{display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--muted);font-size:13px;margin-bottom:12px;transition:all .3s}
+.quick-gps.captured{border-color:var(--green);color:var(--green);background:var(--green-soft)}
+.quick-gps .gps-dot{width:10px;height:10px;border-radius:5px;background:var(--dim);flex-shrink:0;transition:background .3s}
+.quick-gps.captured .gps-dot{background:var(--green);box-shadow:0 0 8px rgba(34,197,94,.5)}
+.quick-actions{display:flex;gap:10px;margin-top:28px;padding-bottom:calc(16px + var(--safe-bottom))}
+.quick-actions .btn{flex:1;padding:16px;font-size:14px;border-radius:var(--radius)}
+.btn-quick-save{background:var(--accent);color:var(--white);font-weight:700}
+.btn-quick-full{background:var(--card);color:var(--accent);border:1px solid var(--accent);font-weight:600}
+
+/* ─── Photo Capture ─── */
+.photo-wrap{margin-bottom:16px}
+.photo-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:16px;background:var(--surface);border:2px dashed var(--border);border-radius:var(--radius);color:var(--muted);font-size:14px;font-weight:600;cursor:pointer;transition:all .2s}
+.photo-btn:active{background:var(--card);border-color:var(--accent);color:var(--accent);transform:scale(.97)}
+.photo-preview{position:relative;margin-top:10px;border-radius:var(--radius);overflow:hidden;border:1px solid var(--border)}
+.photo-preview img{width:100%;height:180px;object-fit:cover;display:block}
+.photo-remove{position:absolute;top:8px;right:8px;width:34px;height:34px;border-radius:17px;background:rgba(0,0,0,.75);border:none;color:var(--white);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.photo-remove:active{background:var(--danger)}
+
+/* ─── Native Select Dropdown ─── */
+.select-native{width:100%;padding:12px 14px;padding-right:38px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:15px;outline:none;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238A8A8E' stroke-width='2' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;transition:border-color .2s}
+.select-native:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+
+/* ─── Draft/Enrich Badge ─── */
+.badge-enrich{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;background:var(--accent-soft);color:var(--accent);border:1px solid rgba(249,115,22,.3);margin-left:6px;vertical-align:middle}
+
+/* ─── Profile Cards ─── */
+.profiles-row{display:flex;gap:10px;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.profiles-row::-webkit-scrollbar{display:none}
+.profile-card{flex-shrink:0;padding:14px 16px;background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);cursor:pointer;text-align:center;min-width:90px;transition:all .2s}
+.profile-card:active{background:var(--card);border-color:var(--accent);transform:scale(.95)}
+.profile-card.selected{border-color:var(--accent);background:var(--accent-soft)}
+.profile-card .profile-icon{font-size:28px;margin-bottom:4px}
+.profile-card .profile-name{font-size:12px;font-weight:700;color:var(--text)}
+.profile-card .profile-desc{font-size:10px;color:var(--dim);margin-top:2px}
 </style>
 </head>
 <body>
@@ -222,7 +265,18 @@ const C = {
   receptivite: ["Très intéressé","Ouvert","Sceptique","Refus"],
   fonction: ["Propriétaire","Gérant","Responsable"],
   materiel: ["Flyer","Pitch deck","Carte de visite"],
+  quartiers: ["Cocody","Plateau","Marcory","Treichville","Yopougon","Abobo","Adjamé","Koumassi","Port-Bouët","Bingerville","Riviera","2 Plateaux","Angré","Zone 4","Vallon","Bassam","Assinie","Bouaké"],
 };
+
+// ─── Profils rapides ────────────────────────────────────────────
+const PROFILES = [
+  {id:"maquis",icon:"🍖",name:"Maquis",desc:"Populaire",defaults:{types:["Maquis"],cuisines:["Ivoirienne"],budget:4,ambiance:3,sociabilite:9,cadence:5,notoriete:5}},
+  {id:"restaurant",icon:"🍽️",name:"Restaurant",desc:"Classique",defaults:{types:["Restaurant"],budget:7,ambiance:7,cadence:6,sociabilite:6,notoriete:6}},
+  {id:"gargote",icon:"🍲",name:"Gargote",desc:"Économique",defaults:{types:["Gargote"],cuisines:["Ivoirienne"],budget:3,cadence:7,ambiance:2,sociabilite:8,notoriete:4}},
+  {id:"street",icon:"🌭",name:"Street Food",desc:"Rapide",defaults:{types:["Street food"],budget:2,cadence:10,ambiance:2,sociabilite:7,notoriete:3}},
+  {id:"fine",icon:"✨",name:"Fine Dining",desc:"Haut de gamme",defaults:{types:["Fine dining"],budget:11,ambiance:11,cadence:4,sociabilite:4,notoriete:8}},
+  {id:"bistrot",icon:"🍷",name:"Bistrot",desc:"Décontracté",defaults:{types:["Bistrot"],budget:6,ambiance:6,cadence:5,sociabilite:7,notoriete:5}},
+];
 
 // ─── State ───────────────────────────────────────────────────────
 let state = {
@@ -245,6 +299,7 @@ function emptyEntry() {
     ts: new Date().toISOString(),
     nom:"",adresse:"",quartier:"",gpsLat:"",gpsLong:"",dateVisite:new Date().toISOString().slice(0,10),spawter:lastSpawter(),
     telephone:"",digital:[],urlHandle:"",
+    photoLieu:"",photoMenu:"",photoPlats:"",quickCapture:false,profile:"",
     types:[],autreType:"",specs:["","",""],cuisines:[],autreCuisine:"",platsSignature:"",
     ecoMin:"",ecoMax:"",moyMin:"",moyMax:"",premMin:"",premMax:"",boissMin:"",boissMax:"",menuType:[],
     budget:6,budgetEst:"",cadence:6,tempsAtt:"",ambiance:6,ambianceN:"",sociabilite:6,sociabiliteN:"",notoriete:6,notorieteN:"",
@@ -504,15 +559,115 @@ function mkGroup(title, children, icon) {
   return g;
 }
 
+// ─── Select Dropdown ─────────────────────────────────────────────
+function mkSelect(label, options, field, placeholder="Sélectionner...") {
+  const d = h("div","field");
+  if(label) d.appendChild(h("label","label",label));
+  const sel = h("select","select-native");
+  const defOpt = h("option",null,placeholder);
+  defOpt.value = "";
+  if(!state.current[field]) defOpt.selected = true;
+  sel.appendChild(defOpt);
+  options.forEach(opt => {
+    const o = h("option",null,opt);
+    o.value = opt;
+    if(state.current[field] === opt) o.selected = true;
+    sel.appendChild(o);
+  });
+  sel.addEventListener("change", e => { state.current[field] = e.target.value; saveDraft(); });
+  d.appendChild(sel);
+  return d;
+}
+
+// ─── Photo Capture ──────────────────────────────────────────────
+function mkPhoto(label, field, renderFn) {
+  const d = h("div","photo-wrap");
+  if(label) d.appendChild(h("label","label",label));
+  const fileInput = h("input",null,null,{type:"file",accept:"image/*",capture:"environment"});
+  fileInput.style.display = "none";
+
+  const hasPhoto = !!state.current[field];
+  if(!hasPhoto) {
+    const btn = h("button","photo-btn btn",`📸 ${label||"Prendre une photo"}`);
+    btn.addEventListener("click", () => fileInput.click());
+    d.appendChild(btn);
+  } else {
+    const preview = h("div","photo-preview");
+    const img = h("img");
+    img.src = state.current[field];
+    preview.appendChild(img);
+    const rmBtn = h("button","photo-remove","✕");
+    rmBtn.addEventListener("click", () => { state.current[field] = ""; saveDraft(); (renderFn||renderForm)(); });
+    preview.appendChild(rmBtn);
+    d.appendChild(preview);
+  }
+
+  fileInput.addEventListener("change", ev => {
+    const file = ev.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = re => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const MAX = 800;
+        let w = img.width, ht = img.height;
+        if(w > MAX) { ht = ht * MAX / w; w = MAX; }
+        if(ht > MAX) { w = w * MAX / ht; ht = MAX; }
+        canvas.width = w; canvas.height = ht;
+        canvas.getContext("2d").drawImage(img, 0, 0, w, ht);
+        state.current[field] = canvas.toDataURL("image/jpeg", 0.7);
+        saveDraft();
+        (renderFn||renderForm)();
+      };
+      img.src = re.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+  d.appendChild(fileInput);
+  return d;
+}
+
+// ─── Profile Selector ───────────────────────────────────────────
+function mkProfiles(renderFn) {
+  const d = h("div","field");
+  d.appendChild(h("label","label","Profil rapide — 1 tap pour pré-remplir"));
+  const row = h("div","profiles-row");
+  PROFILES.forEach(p => {
+    const card = h("div",`profile-card${state.current.profile===p.id?" selected":""}`);
+    card.appendChild(h("div","profile-icon",p.icon));
+    card.appendChild(h("div","profile-name",p.name));
+    card.appendChild(h("div","profile-desc",p.desc));
+    card.addEventListener("click", () => {
+      if(state.current.profile === p.id) {
+        state.current.profile = "";
+      } else {
+        state.current.profile = p.id;
+        Object.entries(p.defaults).forEach(([k,v]) => {
+          state.current[k] = Array.isArray(v) ? [...v] : v;
+        });
+      }
+      saveDraft();
+      (renderFn||renderForm)();
+    });
+    row.appendChild(card);
+  });
+  d.appendChild(row);
+  return d;
+}
+
 // ─── Bloc Renderers ──────────────────────────────────────────────
 function renderBloc0(container) {
   container.appendChild(mkSection("Identification","📍"));
   container.appendChild(mkHint("Infos essentielles sur l'établissement. Les champs marqués * sont obligatoires."));
 
+  // Profil rapide
+  container.appendChild(mkGroup("Profil rapide", [mkProfiles()], "⚡"));
+
   container.appendChild(mkGroup("L'établissement", [
     mkInput("Nom établissement <span class='req'>*</span>","nom","text","Ex: Chez Tantie Rose"),
     mkInput("Adresse complète <span class='req'>*</span>","adresse","text","Rue, n°, bâtiment..."),
-    mkInput("Quartier / Zone <span class='req'>*</span>","quartier","text","Ex: Cocody Riviera"),
+    mkSelect("Quartier / Zone <span class='req'>*</span>", C.quartiers, "quartier", "Choisir un quartier..."),
   ], "🏪"));
 
   const gpsLat = mkInput("Latitude","gpsLat","number");
@@ -537,6 +692,9 @@ function renderBloc0(container) {
     }
   });
   container.appendChild(mkGroup("Localisation GPS", [gpsGrid, gpsBtn], "📡"));
+
+  // Photo du lieu
+  container.appendChild(mkGroup("Photo du lieu", [mkPhoto("Photographier le lieu","photoLieu")], "📸"));
 
   container.appendChild(mkGroup("Visite", [
     mkInput("Date visite <span class='req'>*</span>","dateVisite","date"),
@@ -578,6 +736,12 @@ function renderBloc1(container) {
   g.appendChild(mkInput("Boissons min","boissMin","number","FCFA"));
   g.appendChild(mkInput("Boissons max","boissMax","number","FCFA"));
   container.appendChild(mkGroup("Grille tarifaire (FCFA)", [g, mkChips("Format du menu", C.menu, "menuType")], "💰"));
+
+  // Photos menu et plats
+  container.appendChild(mkGroup("Photos (optionnel)", [
+    mkPhoto("Photographier le menu / ardoise","photoMenu"),
+    mkPhoto("Photographier les plats","photoPlats"),
+  ], "📸"));
 }
 
 function renderBloc2(container) {
@@ -698,7 +862,7 @@ function renderBloc5(container) {
 
   container.appendChild(mkGroup("Qualité du lieu", [
     mkChips("Propreté", C.proprete, "proprete", false),
-    mkInput("Nombre de serveurs","serveurs","number","Ex: 3"),
+    mkSelect("Nombre de serveurs", ["1","2","3","4","5","6","7","8","9","10+"], "serveurs", "Combien de serveurs ?"),
     mkChips("Qualité de l'accueil", C.accueil, "accueil", false),
   ], "✨"));
 
@@ -772,6 +936,136 @@ const BLOCS = [
   {t:"B2B",i:"🤝",r:renderBloc6},
 ];
 
+// ─── Render: Quick Capture ───────────────────────────────────────
+function renderQuickCapture() {
+  const app = $("#app");
+  app.innerHTML = "";
+  const e = state.current;
+
+  // Header
+  const hdr = h("div","header");
+  const backBtn = h("button","btn btn-back","✕");
+  backBtn.addEventListener("click", () => { state.view = "list"; renderList(); });
+  hdr.appendChild(backBtn);
+  hdr.appendChild(h("div",null,'<span style="font-weight:700;font-size:15px;color:var(--accent)">CAPTURE RAPIDE</span>'));
+  hdr.appendChild(h("div",null,null)).style.width = "38px"; // spacer
+  app.appendChild(hdr);
+
+  // Scroll content
+  const scroll = h("div","scroll");
+  scroll.style.padding = "16px 20px";
+
+  // Auto GPS
+  const gpsHas = e.gpsLat && e.gpsLong;
+  const gpsRow = h("div",`quick-gps${gpsHas?" captured":""}`);
+  gpsRow.appendChild(h("div","gps-dot"));
+  gpsRow.appendChild(h("span",null, gpsHas
+    ? `📍 Position capturée (${Number(e.gpsLat).toFixed(4)}, ${Number(e.gpsLong).toFixed(4)})`
+    : "📡 Capture GPS en cours..."));
+  scroll.appendChild(gpsRow);
+
+  // Auto-trigger GPS
+  if(!gpsHas && navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(pos => {
+      e.gpsLat = pos.coords.latitude.toFixed(6);
+      e.gpsLong = pos.coords.longitude.toFixed(6);
+      saveDraft();
+      const el = $(".quick-gps", app);
+      if(el) {
+        el.className = "quick-gps captured";
+        el.querySelector("span").innerHTML = `📍 Position capturée (${Number(e.gpsLat).toFixed(4)}, ${Number(e.gpsLong).toFixed(4)})`;
+        el.querySelector(".gps-dot").style.background = "var(--green)";
+      }
+    }, () => {}, {enableHighAccuracy:true,timeout:10000});
+  }
+
+  // Nom
+  scroll.appendChild(h("div","quick-section","Nom du lieu"));
+  const nomInput = h("input","quick-input",null,{type:"text",placeholder:"Ex: Chez Tantie Rose",value:e.nom});
+  nomInput.addEventListener("input", ev => { e.nom = ev.target.value; saveDraft(); });
+  scroll.appendChild(nomInput);
+
+  // Profil rapide
+  scroll.appendChild(h("div","quick-section","Profil rapide"));
+  scroll.appendChild(mkProfiles(renderQuickCapture));
+
+  // Type
+  scroll.appendChild(h("div","quick-section","Type de lieu"));
+  const typeChips = h("div","chips");
+  C.types.forEach(t => {
+    const active = (e.types||[]).includes(t);
+    const chip = h("button",`chip${active?" active":""}`,t);
+    chip.addEventListener("click", () => {
+      const arr = [...(e.types||[])];
+      const idx = arr.indexOf(t);
+      if(idx>=0) arr.splice(idx,1); else arr.push(t);
+      e.types = arr;
+      saveDraft();
+      renderQuickCapture();
+    });
+    typeChips.appendChild(chip);
+  });
+  scroll.appendChild(typeChips);
+
+  // Potentiel
+  scroll.appendChild(h("div","quick-section","Ton verdict"));
+  const potChips = h("div","chips");
+  C.potentiel.forEach(p => {
+    const active = e.potentiel === p.id;
+    const chip = h("button",`chip${active?" active":""}`,`${p.e} ${p.l}`);
+    chip.style.fontSize = "14px";
+    chip.style.padding = "10px 16px";
+    chip.addEventListener("click", () => {
+      e.potentiel = e.potentiel === p.id ? "" : p.id;
+      saveDraft();
+      renderQuickCapture();
+    });
+    potChips.appendChild(chip);
+  });
+  scroll.appendChild(potChips);
+
+  // Photo
+  scroll.appendChild(h("div","quick-section","Photo du lieu (optionnel)"));
+  scroll.appendChild(mkPhoto("Photo du lieu","photoLieu",renderQuickCapture));
+
+  // Accroche
+  scroll.appendChild(h("div","quick-section","En un mot (optionnel)"));
+  const accInput = h("input","input",null,{type:"text",placeholder:"Ta phrase d'accroche...",value:e.accroche||""});
+  accInput.style.fontSize = "15px";
+  accInput.addEventListener("input", ev => { e.accroche = ev.target.value; saveDraft(); });
+  scroll.appendChild(accInput);
+
+  // Actions
+  const actions = h("div","quick-actions");
+  const saveBtn = h("button","btn btn-quick-save","✓ Enregistrer");
+  saveBtn.addEventListener("click", () => {
+    e.quickCapture = true;
+    e.spawter = lastSpawter() || "Spawter";
+    if(e.spawter) { try { localStorage.setItem(SPAWTER_KEY, e.spawter); } catch(ex) {} }
+    const idx = state.entries.findIndex(x => x.id === e.id);
+    if(idx >= 0) state.entries[idx] = e;
+    else state.entries.unshift(e);
+    save();
+    clearDraft();
+    state.view = "list";
+    renderList();
+    showToast(`"${e.nom||"Nouveau lieu"}" capturé !`,"success","⚡");
+  });
+  actions.appendChild(saveBtn);
+
+  const fullBtn = h("button","btn btn-quick-full","Mode complet →");
+  fullBtn.addEventListener("click", () => {
+    e.quickCapture = false;
+    state.bloc = 0;
+    state.view = "form";
+    renderForm();
+  });
+  actions.appendChild(fullBtn);
+  scroll.appendChild(actions);
+
+  app.appendChild(scroll);
+}
+
 // ─── CSV Export ──────────────────────────────────────────────────
 function exportCSV() {
   const esc = v => { const s=String(v??""); return s.includes(",")||s.includes('"')||s.includes("\n") ? `"${s.replace(/"/g,'""')}"` : s; };
@@ -801,6 +1095,8 @@ function exportCSV() {
     "Serveurs":e.serveurs,"Accueil":e.accueil,"Potentiel":e.potentiel,"Notes":e.notes,
     "Contact B2B":e.contactEtabli,"Contact nom":e.contactNom,"Fonction":e.fonction,
     "Réceptivité":e.receptivite,"RDV":e.rdv?`Oui - ${e.rdvDate}`:"Non","Notes B2B":e.notesB2B,
+    "Profil":e.profile||"","Capture rapide":e.quickCapture?"Oui":"Non",
+    "Photo lieu":e.photoLieu?"Oui":"Non","Photo menu":e.photoMenu?"Oui":"Non","Photo plats":e.photoPlats?"Oui":"Non",
   }));
 
   if(!rows.length) return;
@@ -837,12 +1133,11 @@ function renderList() {
     expBtn.addEventListener("click", exportCSV);
     right.appendChild(expBtn);
   }
-  const newBtn = h("button","btn btn-primary","+ Nouveau");
+  const newBtn = h("button","btn btn-primary","⚡ Capturer");
   newBtn.addEventListener("click", () => {
     state.current = emptyEntry();
-    state.bloc = 0;
-    state.view = "form";
-    renderForm();
+    state.view = "quick";
+    renderQuickCapture();
   });
   right.appendChild(newBtn);
   hdr.appendChild(right);
@@ -924,6 +1219,7 @@ function renderList() {
     nameRow.style.cssText = "display:flex;align-items:center;gap:6px";
     if(pot) nameRow.appendChild(h("span",null,pot.e));
     nameRow.appendChild(h("span","entry-name",entry.nom||"Sans nom"));
+    if(entry.quickCapture) nameRow.appendChild(h("span","badge-enrich","À enrichir"));
     info.appendChild(nameRow);
     const meta = (entry.quartier||"") + (entry.quartier&&entry.types.length>0?" · ":"") + (entry.types||[]).join(", ");
     if(meta) info.appendChild(h("div","entry-meta",meta));
@@ -1090,6 +1386,7 @@ function setupSwipe(el) {
 // ─── Save ────────────────────────────────────────────────────────
 function doSave() {
   const e = state.current;
+  e.quickCapture = false; // saving from full mode = enriched
   // Remember spawter name
   if(e.spawter) {
     try { localStorage.setItem(SPAWTER_KEY, e.spawter); } catch(ex) {}
