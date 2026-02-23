@@ -13,121 +13,193 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 :root{
---bg:#0C0C0E;--surface:#161619;--card:#1A1A1F;--border:#2A2A30;
---accent:#F97316;--accent-soft:rgba(249,115,22,0.15);
+--bg:#0C0C0E;--surface:#161619;--card:#1A1A1F;--card2:#1E1E24;--border:#2A2A30;
+--accent:#F97316;--accent-soft:rgba(249,115,22,0.12);--accent-glow:rgba(249,115,22,0.25);
+--green:#22c55e;--green-soft:rgba(34,197,94,0.12);
 --text:#E8E6E3;--muted:#8A8A8E;--dim:#5A5A5E;
 --danger:#EF4444;--white:#FFFFFF;
 --safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px);
+--radius:12px;--radius-sm:8px;
 }
-html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',sans-serif;font-size:14px;-webkit-font-smoothing:antialiased}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','SF Pro Display',sans-serif;font-size:14px;-webkit-font-smoothing:antialiased}
 input,textarea,select,button{font-family:inherit;font-size:inherit}
 input[type="date"],input[type="time"],input[type="number"],input[type="tel"]{-webkit-appearance:none;appearance:none}
 
 #app{height:100%;display:flex;flex-direction:column}
 
 /* ─── Header ─── */
-.header{display:flex;align-items:center;justify-content:space-between;padding:8px 16px;padding-top:calc(8px + var(--safe-top));border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0;min-height:52px}
+.header{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;padding-top:calc(10px + var(--safe-top));border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0;min-height:54px}
 .header-title{font-size:22px;font-weight:800;color:var(--accent);letter-spacing:2px;font-family:'Courier New',monospace}
 .header-sub{font-size:11px;color:var(--dim);margin-top:1px}
 
+/* ─── Progress Bar ─── */
+.progress-bar{height:3px;background:var(--border);flex-shrink:0;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),#fb923c);transition:width .5s cubic-bezier(.4,0,.2,1);border-radius:0 2px 2px 0}
+
 /* ─── Buttons ─── */
-.btn{border:none;cursor:pointer;border-radius:8px;font-weight:600;transition:opacity .15s;-webkit-user-select:none}
-.btn:active{opacity:.7}
-.btn-primary{background:var(--accent);color:var(--white);padding:8px 16px;font-size:13px;font-weight:700}
-.btn-icon{width:36px;height:36px;display:flex;align-items:center;justify-content:center;background:var(--surface);border:1px solid var(--border);font-size:16px;border-radius:8px}
-.btn-back{width:36px;height:36px;display:flex;align-items:center;justify-content:center;background:none;color:var(--muted);font-size:18px}
-.btn-save{width:36px;height:36px;display:flex;align-items:center;justify-content:center;background:var(--accent-soft);border:1px solid var(--accent);border-radius:8px;font-size:16px}
-.btn-secondary{width:100%;padding:10px;background:var(--surface);color:var(--accent);border:1px solid var(--border);font-size:13px;font-weight:600;margin-bottom:8px}
-.btn-nav{flex:1;padding:12px;background:var(--card);border:1px solid var(--border);color:var(--muted);font-size:13px;font-weight:600}
-.btn-nav-primary{flex:1;padding:12px;background:var(--accent);color:var(--white);font-size:13px;font-weight:700}
-.btn-danger{background:none;border:none;color:var(--danger);font-size:12px;padding:8px;opacity:.6}
+.btn{border:none;cursor:pointer;border-radius:var(--radius-sm);font-weight:600;transition:all .15s;-webkit-user-select:none}
+.btn:active{opacity:.7;transform:scale(.97)}
+.btn-primary{background:var(--accent);color:var(--white);padding:10px 18px;font-size:13px;font-weight:700;border-radius:var(--radius)}
+.btn-icon{width:38px;height:38px;display:flex;align-items:center;justify-content:center;background:var(--surface);border:1px solid var(--border);font-size:16px;border-radius:var(--radius-sm)}
+.btn-back{width:38px;height:38px;display:flex;align-items:center;justify-content:center;background:none;color:var(--muted);font-size:18px;border-radius:var(--radius-sm)}
+.btn-save{width:38px;height:38px;display:flex;align-items:center;justify-content:center;background:var(--accent-soft);border:1px solid var(--accent);border-radius:var(--radius-sm);font-size:16px}
+.btn-secondary{width:100%;padding:12px;background:var(--card);color:var(--accent);border:1px solid var(--border);font-size:13px;font-weight:600;margin-bottom:8px;border-radius:var(--radius)}
+.btn-nav{flex:1;padding:14px;background:var(--card);border:1px solid var(--border);color:var(--muted);font-size:13px;font-weight:600;border-radius:var(--radius)}
+.btn-nav-primary{flex:1;padding:14px;background:var(--accent);color:var(--white);font-size:13px;font-weight:700;border-radius:var(--radius)}
+.btn-danger{background:none;border:none;color:var(--danger);font-size:12px;padding:10px;opacity:.6}
 
 /* ─── Form Elements ─── */
-.field{margin-bottom:14px}
-.label{display:block;font-size:11px;font-weight:600;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px}
-.input{width:100%;padding:10px 12px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;outline:none}
-.input:focus{border-color:var(--accent)}
+.field{margin-bottom:16px}
+.label{display:block;font-size:11px;font-weight:600;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
+.label .req{color:var(--accent);margin-left:2px}
+.input{width:100%;padding:12px 14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:15px;outline:none;transition:border-color .2s,box-shadow .2s}
+.input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.input::placeholder{color:var(--dim)}
 textarea.input{resize:vertical;min-height:60px}
 
+/* ─── Field Groups (cards) ─── */
+.field-group{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px 16px 4px;margin-bottom:16px}
+.field-group-title{font-size:12px;font-weight:700;color:var(--text);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.field-group-title .fg-icon{font-size:14px;opacity:.7}
+
 /* ─── Chips ─── */
-.chips{display:flex;flex-wrap:wrap;gap:6px}
-.chip{padding:6px 12px;border-radius:20px;border:1px solid var(--border);font-size:12px;font-weight:500;cursor:pointer;background:var(--surface);color:var(--muted);white-space:nowrap;transition:all .15s}
-.chip:active{opacity:.7}
-.chip.active{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{padding:8px 14px;border-radius:20px;border:1px solid var(--border);font-size:13px;font-weight:500;cursor:pointer;background:var(--surface);color:var(--muted);white-space:nowrap;transition:all .2s cubic-bezier(.4,0,.2,1)}
+.chip:active{transform:scale(.93)}
+.chip.active{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);box-shadow:0 0 0 1px var(--accent-soft)}
 
 /* ─── Slider ─── */
-.slider-wrap{margin-bottom:18px}
-input[type="range"]{width:100%;accent-color:var(--accent);height:6px}
-.slider-labels{display:flex;justify-content:space-between;font-size:11px;color:var(--dim);margin-top:4px}
-.slider-val{color:var(--accent);font-weight:700;font-size:14px}
+.slider-wrap{margin-bottom:20px}
+input[type="range"]{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:3px;outline:none;cursor:pointer;background:var(--border)}
+input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;border-radius:13px;background:var(--accent);cursor:pointer;border:3px solid var(--bg);box-shadow:0 2px 8px rgba(249,115,22,.35)}
+input[type="range"]::-moz-range-thumb{width:26px;height:26px;border-radius:13px;background:var(--accent);cursor:pointer;border:3px solid var(--bg);box-shadow:0 2px 8px rgba(249,115,22,.35)}
+.slider-labels{display:flex;justify-content:space-between;font-size:11px;color:var(--dim);margin-top:8px;align-items:center}
+.slider-val{color:var(--accent);font-weight:800;font-size:20px;background:var(--accent-soft);padding:2px 10px;border-radius:8px;min-width:36px;text-align:center}
 
 /* ─── Stars ─── */
-.stars{display:flex;gap:8px;margin-bottom:14px}
-.star{background:none;border:none;font-size:28px;padding:0;cursor:pointer}
+.stars{display:flex;gap:6px;margin-bottom:14px}
+.star{background:none;border:none;font-size:32px;padding:4px;cursor:pointer;transition:transform .15s}
+.star:active{transform:scale(1.2)}
 .star.off{filter:grayscale(1) opacity(.3)}
 
 /* ─── Toggle ─── */
-.toggle-row{display:flex;align-items:center;gap:10px;margin-bottom:14px}
-.toggle-track{width:44px;height:24px;border-radius:12px;position:relative;cursor:pointer;transition:background .2s;border:none;flex-shrink:0}
+.toggle-row{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.toggle-track{width:48px;height:28px;border-radius:14px;position:relative;cursor:pointer;transition:background .25s;border:none;flex-shrink:0}
 .toggle-track.on{background:var(--accent)}
 .toggle-track.off{background:var(--border)}
-.toggle-thumb{width:18px;height:18px;border-radius:9px;background:var(--white);position:absolute;top:3px;transition:left .2s}
+.toggle-thumb{width:22px;height:22px;border-radius:11px;background:var(--white);position:absolute;top:3px;transition:left .25s cubic-bezier(.4,0,.2,1);box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.toggle-label{font-size:14px;color:var(--text)}
 
 /* ─── Section Header ─── */
-.section-hdr{display:flex;align-items:center;gap:8px;margin-bottom:16px;margin-top:24px}
-.section-hdr h3{margin:0;color:var(--accent);font-size:14px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;white-space:nowrap}
+.section-hdr{display:flex;align-items:center;gap:10px;margin-bottom:8px;margin-top:8px}
+.section-hdr h3{margin:0;color:var(--accent);font-size:15px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;white-space:nowrap}
 .section-hdr .line{flex:1;height:1px;background:var(--border)}
+.section-hint{font-size:12px;color:var(--dim);margin-bottom:20px;line-height:1.5;padding-left:2px}
 
 /* ─── Entry Card ─── */
-.entry-card{width:100%;display:block;text-align:left;padding:14px 16px;background:var(--card);border:1px solid var(--border);border-radius:12px;margin-bottom:8px;cursor:pointer;transition:background .15s}
-.entry-card:active{background:var(--surface)}
+.entry-card{width:100%;display:block;text-align:left;padding:16px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:10px;cursor:pointer;transition:all .15s}
+.entry-card:active{background:var(--surface);transform:scale(.98)}
 .entry-name{color:var(--text);font-weight:700;font-size:16px}
 .entry-meta{color:var(--muted);font-size:12px;margin-top:4px}
 .entry-date{color:var(--dim);font-size:11px}
 .entry-accroche{color:var(--accent);font-size:12px;font-style:italic;margin-top:6px;opacity:.8}
 
 /* ─── Bloc Nav ─── */
-.bloc-nav{display:flex;overflow-x:auto;padding:8px 12px;gap:4px;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0;-webkit-overflow-scrolling:touch}
-.bloc-tab{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 10px;border-radius:8px;border:none;background:none;color:var(--dim);cursor:pointer;min-width:52px;font-size:9px;font-weight:600}
+.bloc-nav{display:flex;overflow-x:auto;padding:8px 12px;gap:4px;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.bloc-nav::-webkit-scrollbar{display:none}
+.bloc-tab{display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 12px;border-radius:var(--radius-sm);border:none;background:none;color:var(--dim);cursor:pointer;min-width:56px;font-size:10px;font-weight:600;position:relative;transition:all .2s}
 .bloc-tab.active{background:var(--accent-soft);color:var(--accent)}
-.bloc-tab .ico{font-size:16px}
+.bloc-tab .ico{font-size:18px}
+.bloc-tab .dot{width:6px;height:6px;border-radius:3px;position:absolute;top:4px;right:6px}
+.bloc-tab .dot.empty{background:var(--dim);opacity:.3}
+.bloc-tab .dot.partial{background:var(--accent)}
+.bloc-tab .dot.complete{background:var(--green)}
 
 /* ─── Bottom Bar ─── */
 .bottom-bar{display:flex;gap:8px;padding:12px 16px;padding-bottom:calc(12px + var(--safe-bottom));background:var(--surface);border-top:1px solid var(--border);flex-shrink:0}
 
 /* ─── Scroll Area ─── */
-.scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:8px 16px;padding-bottom:80px}
+.scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px}
+.scroll.slide-in{animation:slideIn .3s cubic-bezier(.4,0,.2,1)}
+@keyframes slideIn{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:translateX(0)}}
+@keyframes slideInReverse{from{opacity:0;transform:translateX(-40px)}to{opacity:1;transform:translateX(0)}}
+.scroll.slide-in-reverse{animation:slideInReverse .3s cubic-bezier(.4,0,.2,1)}
 .list-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 16px;padding-bottom:80px}
 
 /* ─── Search ─── */
-.search-bar{padding:8px 16px 0}
-.filter-row{display:flex;gap:4px;overflow-x:auto;padding:6px 16px 10px;-webkit-overflow-scrolling:touch}
-.filter-chip{padding:4px 10px;border-radius:12px;border:1px solid var(--border);background:var(--surface);color:var(--muted);font-size:12px;cursor:pointer;white-space:nowrap}
+.search-bar{padding:10px 16px 0}
+.filter-row{display:flex;gap:6px;overflow-x:auto;padding:8px 16px 10px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.filter-row::-webkit-scrollbar{display:none}
+.filter-chip{padding:6px 12px;border-radius:14px;border:1px solid var(--border);background:var(--surface);color:var(--muted);font-size:12px;cursor:pointer;white-space:nowrap;transition:all .15s}
 .filter-chip.active{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
 
 /* ─── Grid ─── */
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.grid-time{display:grid;grid-template-columns:auto 1fr auto 1fr;gap:6px;align-items:center;margin-bottom:10px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.grid-time{display:grid;grid-template-columns:auto 1fr auto 1fr;gap:8px;align-items:center;margin-bottom:12px}
 .mini-label{font-size:12px;color:var(--muted);font-weight:600}
 
 /* ─── Empty ─── */
 .empty{text-align:center;padding:60px 20px}
-.empty-ico{font-size:48px;margin-bottom:16px}
-.empty-txt{color:var(--muted);font-size:14px;line-height:1.6}
+.empty-ico{font-size:56px;margin-bottom:20px}
+.empty-txt{color:var(--muted);font-size:15px;line-height:1.6}
 
 /* ─── Stats bar ─── */
 .stats-row{display:flex;gap:8px;padding:8px 16px;flex-wrap:wrap}
-.stat-badge{padding:3px 8px;border-radius:10px;font-size:11px;font-weight:600;background:var(--surface);border:1px solid var(--border);color:var(--muted)}
+.stat-badge{padding:4px 10px;border-radius:10px;font-size:11px;font-weight:600;background:var(--surface);border:1px solid var(--border);color:var(--muted)}
+
+/* ─── Toast ─── */
+.toast-container{position:fixed;bottom:calc(80px + var(--safe-bottom));left:16px;right:16px;z-index:1000;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.toast{padding:14px 18px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);font-size:13px;font-weight:500;pointer-events:auto;display:flex;align-items:center;gap:10px;box-shadow:0 8px 24px rgba(0,0,0,.4);animation:toastIn .35s cubic-bezier(.4,0,.2,1)}
+.toast.success{border-color:var(--green);background:linear-gradient(135deg,var(--card),var(--green-soft))}
+.toast.info{border-color:var(--accent)}
+.toast.leaving{animation:toastOut .3s ease forwards}
+@keyframes toastIn{from{opacity:0;transform:translateY(20px) scale(.95)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes toastOut{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(20px)}}
+
+/* ─── Bottom Sheet Modal ─── */
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:999;display:none;align-items:flex-end;justify-content:center;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+.modal-backdrop.active{display:flex;animation:fadeIn .2s ease}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.bottom-sheet{width:100%;max-width:420px;background:var(--card);border-radius:20px 20px 0 0;padding:28px 24px;padding-bottom:calc(28px + var(--safe-bottom));animation:sheetUp .35s cubic-bezier(.4,0,.2,1)}
+@keyframes sheetUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.sheet-handle{width:40px;height:4px;border-radius:2px;background:var(--border);margin:0 auto 20px}
+.sheet-title{font-size:17px;font-weight:700;color:var(--text);margin-bottom:8px}
+.sheet-msg{font-size:14px;color:var(--muted);margin-bottom:24px;line-height:1.5}
+.sheet-actions{display:flex;gap:10px}
+.sheet-actions .btn{flex:1;padding:14px;font-size:14px;border-radius:var(--radius)}
+.btn-sheet-cancel{background:var(--surface);color:var(--muted);border:1px solid var(--border)}
+.btn-sheet-danger{background:var(--danger);color:var(--white)}
+.btn-sheet-confirm{background:var(--accent);color:var(--white)}
+
+/* ─── Draft Banner ─── */
+.draft-banner{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--accent-soft);border-bottom:1px solid rgba(249,115,22,.2)}
+.draft-banner-text{font-size:13px;color:var(--accent);font-weight:500}
+.draft-banner-actions{display:flex;gap:8px}
+.draft-banner-actions .btn{padding:6px 14px;font-size:12px}
+.btn-draft-restore{background:var(--accent);color:var(--white);border-radius:var(--radius-sm)}
+.btn-draft-dismiss{background:none;color:var(--muted);border:1px solid var(--border);border-radius:var(--radius-sm)}
+
+/* ─── Summary Card ─── */
+.summary-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px}
+.summary-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px}
+.summary-row:last-child{border-bottom:none}
+.summary-key{color:var(--muted)}
+.summary-val{color:var(--text);font-weight:600;text-align:right;max-width:60%}
+.summary-val.empty{color:var(--dim);font-weight:400;font-style:italic}
 </style>
 </head>
 <body>
 <div id="app"></div>
+<div class="toast-container" id="toast-container"></div>
+<div class="modal-backdrop" id="modal-backdrop"></div>
 <script>
 // ═══════════════════════════════════════════════════════════════════
-// SPAWT FIELD COLLECTION PWA
+// SPAWT FIELD COLLECTION PWA — v2.0 Ergonomic
 // ═══════════════════════════════════════════════════════════════════
 
 const STORAGE_KEY = "spawt-entries";
+const DRAFT_KEY = "spawt-draft";
+const SPAWTER_KEY = "spawt-last-spawter";
 
 // ─── Data Constants ──────────────────────────────────────────────
 const C = {
@@ -158,15 +230,20 @@ let state = {
   entries: [],
   current: null,
   bloc: 0,
+  prevBloc: 0,
   search: "",
   filterPot: "",
 };
+
+function lastSpawter() {
+  try { return localStorage.getItem(SPAWTER_KEY) || ""; } catch(e) { return ""; }
+}
 
 function emptyEntry() {
   return {
     id: Date.now().toString(36) + Math.random().toString(36).slice(2,7),
     ts: new Date().toISOString(),
-    nom:"",adresse:"",quartier:"",gpsLat:"",gpsLong:"",dateVisite:new Date().toISOString().slice(0,10),spawter:"",
+    nom:"",adresse:"",quartier:"",gpsLat:"",gpsLong:"",dateVisite:new Date().toISOString().slice(0,10),spawter:lastSpawter(),
     telephone:"",digital:[],urlHandle:"",
     types:[],autreType:"",specs:["","",""],cuisines:[],autreCuisine:"",platsSignature:"",
     ecoMin:"",ecoMax:"",moyMin:"",moyMax:"",premMin:"",premMax:"",boissMin:"",boissMax:"",menuType:[],
@@ -188,6 +265,100 @@ function load() {
   try { const d = localStorage.getItem(STORAGE_KEY); if(d) state.entries = JSON.parse(d); } catch(e) {}
 }
 
+// ─── Draft Auto-Save ─────────────────────────────────────────────
+let draftTimer = null;
+function saveDraft() {
+  if(draftTimer) clearTimeout(draftTimer);
+  draftTimer = setTimeout(() => {
+    if(state.current) {
+      try { localStorage.setItem(DRAFT_KEY, JSON.stringify({entry:state.current,bloc:state.bloc,ts:Date.now()})); } catch(e) {}
+    }
+  }, 800);
+}
+function loadDraft() {
+  try { const d = localStorage.getItem(DRAFT_KEY); return d ? JSON.parse(d) : null; } catch(e) { return null; }
+}
+function clearDraft() {
+  if(draftTimer) clearTimeout(draftTimer);
+  try { localStorage.removeItem(DRAFT_KEY); } catch(e) {}
+}
+
+// ─── Toast System ────────────────────────────────────────────────
+function showToast(msg, type="info", icon="") {
+  const container = document.getElementById("toast-container");
+  const icons = {success:"✓",info:"ℹ",warning:"⚠"};
+  const ico = icon || icons[type] || "";
+  const toast = h("div",`toast ${type}`,`<span style="font-size:16px">${ico}</span> ${msg}`);
+  container.appendChild(toast);
+  setTimeout(() => {
+    toast.classList.add("leaving");
+    setTimeout(() => toast.remove(), 300);
+  }, 2500);
+}
+
+// ─── Bottom Sheet Confirm ────────────────────────────────────────
+function showConfirm(title, msg, confirmLabel, onConfirm, danger=false) {
+  const backdrop = document.getElementById("modal-backdrop");
+  backdrop.className = "modal-backdrop active";
+  backdrop.innerHTML = "";
+  const sheet = h("div","bottom-sheet");
+  sheet.appendChild(h("div","sheet-handle"));
+  sheet.appendChild(h("div","sheet-title",title));
+  sheet.appendChild(h("div","sheet-msg",msg));
+  const actions = h("div","sheet-actions");
+  const cancelBtn = h("button","btn btn-sheet-cancel","Annuler");
+  cancelBtn.addEventListener("click", () => { backdrop.className = "modal-backdrop"; });
+  const confirmBtn = h("button",`btn ${danger?"btn-sheet-danger":"btn-sheet-confirm"}`,confirmLabel);
+  confirmBtn.addEventListener("click", () => { backdrop.className = "modal-backdrop"; onConfirm(); });
+  actions.appendChild(cancelBtn);
+  actions.appendChild(confirmBtn);
+  sheet.appendChild(actions);
+  backdrop.appendChild(sheet);
+  backdrop.addEventListener("click", e => {
+    if(e.target === backdrop) backdrop.className = "modal-backdrop";
+  });
+}
+
+// ─── Progress Calc ───────────────────────────────────────────────
+function calcBlocProgress(bloc) {
+  const e = state.current;
+  if(!e) return 0;
+  const filled = v => v && (Array.isArray(v) ? v.length > 0 : String(v).trim().length > 0);
+  switch(bloc) {
+    case 0: {
+      const f = [e.nom,e.adresse,e.quartier,e.dateVisite,e.spawter];
+      return f.filter(filled).length / f.length;
+    }
+    case 1: {
+      const f = [(e.types||[]).length>0,(e.cuisines||[]).length>0];
+      return f.filter(Boolean).length / f.length;
+    }
+    case 2: return 1;
+    case 3: {
+      const f = [e.hLVde,(e.paiements||[]).length>0];
+      return f.filter(filled).length / f.length;
+    }
+    case 4: {
+      const f = [e.reco];
+      return f.filter(filled).length / f.length;
+    }
+    case 5: {
+      const f = [e.potentiel,(e.clientele||[]).length>0];
+      return f.filter(filled).length / f.length;
+    }
+    case 6: {
+      const f = [e.contactEtabli];
+      return f.filter(filled).length / f.length;
+    }
+  }
+  return 0;
+}
+function calcTotalProgress() {
+  let sum = 0;
+  for(let i = 0; i < BLOCS.length; i++) sum += calcBlocProgress(i);
+  return sum / BLOCS.length;
+}
+
 // ─── Helpers ─────────────────────────────────────────────────────
 const $ = (s,p) => (p||document).querySelector(s);
 const $$ = (s,p) => [...(p||document).querySelectorAll(s)];
@@ -201,14 +372,13 @@ const h = (tag, cls, html, attrs) => {
   });
   return el;
 };
-const upd = (field, val) => { state.current[field] = val; renderForm(); };
 
 // ─── Render Helpers ──────────────────────────────────────────────
 function mkInput(label, field, type="text", placeholder="") {
   const d = h("div","field");
   if(label) d.appendChild(h("label","label",label));
   const inp = h("input","input",null,{type,value:state.current[field]||"",placeholder});
-  inp.addEventListener("input", e => { state.current[field] = e.target.value; });
+  inp.addEventListener("input", e => { state.current[field] = e.target.value; saveDraft(); });
   d.appendChild(inp);
   return d;
 }
@@ -218,19 +388,20 @@ function mkTextarea(label, field, placeholder="", rows=3) {
   if(label) d.appendChild(h("label","label",label));
   const ta = h("textarea","input",null,{placeholder,rows});
   ta.value = state.current[field] || "";
-  ta.addEventListener("input", e => { state.current[field] = e.target.value; });
+  ta.addEventListener("input", e => { state.current[field] = e.target.value; saveDraft(); });
   d.appendChild(ta);
   return d;
 }
 
-function mkArrayInput(label, field, index) {
+function mkArrayInput(label, field, index, placeholder="") {
   const d = h("div","field");
   if(label) d.appendChild(h("label","label",label));
-  const inp = h("input","input",null,{type:"text",value:(state.current[field]||[])[index]||""});
+  const inp = h("input","input",null,{type:"text",value:(state.current[field]||[])[index]||"",placeholder});
   inp.addEventListener("input", e => {
     const arr = [...(state.current[field]||[])];
     arr[index] = e.target.value;
     state.current[field] = arr;
+    saveDraft();
   });
   d.appendChild(inp);
   return d;
@@ -256,6 +427,7 @@ function mkChips(label, options, field, multi=true) {
       } else {
         state.current[field] = state.current[field] === val ? "" : val;
       }
+      saveDraft();
       renderForm();
     });
     row.appendChild(chip);
@@ -264,13 +436,24 @@ function mkChips(label, options, field, multi=true) {
   return d;
 }
 
-function mkSlider(label, field, leftL, rightL) {
+function mkSlider(label, field, leftL, rightL, leftIcon="", rightIcon="") {
   const d = h("div","slider-wrap");
   if(label) d.appendChild(h("label","label",label));
-  const inp = h("input",null,null,{type:"range",min:"1",max:"12",value:String(state.current[field]||6)});
-  inp.addEventListener("input", e => { state.current[field] = Number(e.target.value); renderForm(); });
+  const val = state.current[field] || 6;
+  const pct = ((val - 1) / 11) * 100;
+  const inp = h("input",null,null,{type:"range",min:"1",max:"12",value:String(val)});
+  inp.style.background = `linear-gradient(to right, var(--accent) ${pct}%, var(--border) ${pct}%)`;
+  inp.addEventListener("input", e => {
+    state.current[field] = Number(e.target.value);
+    const p = ((e.target.value - 1) / 11) * 100;
+    e.target.style.background = `linear-gradient(to right, var(--accent) ${p}%, var(--border) ${p}%)`;
+    const valEl = e.target.parentElement.querySelector(".slider-val");
+    if(valEl) valEl.textContent = e.target.value;
+    saveDraft();
+  });
   d.appendChild(inp);
-  const labels = h("div","slider-labels",`<span>${leftL}</span><span class="slider-val">${state.current[field]||6}</span><span>${rightL}</span>`);
+  const labels = h("div","slider-labels",
+    `<span>${leftIcon} ${leftL}</span><span class="slider-val">${val}</span><span>${rightL} ${rightIcon}</span>`);
   d.appendChild(labels);
   return d;
 }
@@ -278,9 +461,9 @@ function mkSlider(label, field, leftL, rightL) {
 function mkStars(field) {
   const d = h("div","stars");
   for(let i=1;i<=5;i++){
-    const s = h("button",`star${i<=state.current[field]?"":""}`,"⭐");
+    const s = h("button","star","⭐");
     if(i > state.current[field]) s.classList.add("off");
-    s.addEventListener("click", () => { state.current[field] = i; renderForm(); });
+    s.addEventListener("click", () => { state.current[field] = i; saveDraft(); renderForm(); });
     d.appendChild(s);
   }
   return d;
@@ -293,9 +476,9 @@ function mkToggle(label, field) {
   const thumb = h("div","toggle-thumb");
   thumb.style.left = on ? "23px" : "3px";
   track.appendChild(thumb);
-  track.addEventListener("click", () => { state.current[field] = !state.current[field]; renderForm(); });
+  track.addEventListener("click", () => { state.current[field] = !state.current[field]; saveDraft(); renderForm(); });
   d.appendChild(track);
-  d.appendChild(h("span",null,label));
+  d.appendChild(h("span","toggle-label",label));
   return d;
 }
 
@@ -307,163 +490,284 @@ function mkSection(title, icon) {
   return d;
 }
 
+function mkHint(text) {
+  return h("div","section-hint",text);
+}
+
+function mkGroup(title, children, icon) {
+  const g = h("div","field-group");
+  if(title) {
+    const t = h("div","field-group-title", (icon?`<span class="fg-icon">${icon}</span> `:"")+title);
+    g.appendChild(t);
+  }
+  children.forEach(c => { if(c) g.appendChild(c); });
+  return g;
+}
+
 // ─── Bloc Renderers ──────────────────────────────────────────────
 function renderBloc0(container) {
-  const e = state.current;
   container.appendChild(mkSection("Identification","📍"));
-  container.appendChild(mkInput("Nom établissement *","nom","text","Ex: Chez Tantie Rose"));
-  container.appendChild(mkInput("Adresse complète *","adresse"));
-  container.appendChild(mkInput("Quartier / Zone *","quartier","text","Ex: Cocody Riviera"));
+  container.appendChild(mkHint("Infos essentielles sur l'établissement. Les champs marqués * sont obligatoires."));
 
+  container.appendChild(mkGroup("L'établissement", [
+    mkInput("Nom établissement <span class='req'>*</span>","nom","text","Ex: Chez Tantie Rose"),
+    mkInput("Adresse complète <span class='req'>*</span>","adresse","text","Rue, n°, bâtiment..."),
+    mkInput("Quartier / Zone <span class='req'>*</span>","quartier","text","Ex: Cocody Riviera"),
+  ], "🏪"));
+
+  const gpsLat = mkInput("Latitude","gpsLat","number");
+  const gpsLong = mkInput("Longitude","gpsLong","number");
   const gpsGrid = h("div","grid2");
-  gpsGrid.appendChild(mkInput("GPS Lat","gpsLat","number"));
-  gpsGrid.appendChild(mkInput("GPS Long","gpsLong","number"));
-  container.appendChild(gpsGrid);
-
+  gpsGrid.appendChild(gpsLat);
+  gpsGrid.appendChild(gpsLong);
   const gpsBtn = h("button","btn btn-secondary","📡 Localisation GPS auto");
   gpsBtn.addEventListener("click", () => {
     if(navigator.geolocation) {
+      gpsBtn.innerHTML = "📡 Recherche en cours...";
       navigator.geolocation.getCurrentPosition(pos => {
         state.current.gpsLat = pos.coords.latitude.toFixed(6);
         state.current.gpsLong = pos.coords.longitude.toFixed(6);
+        saveDraft();
+        showToast("Position GPS capturée","success","📍");
         renderForm();
-      }, err => alert("GPS indisponible: " + err.message), {enableHighAccuracy:true});
+      }, err => {
+        showToast("GPS indisponible: " + err.message,"warning","⚠");
+        gpsBtn.innerHTML = "📡 Localisation GPS auto";
+      }, {enableHighAccuracy:true,timeout:10000});
     }
   });
-  container.appendChild(gpsBtn);
+  container.appendChild(mkGroup("Localisation GPS", [gpsGrid, gpsBtn], "📡"));
 
-  container.appendChild(mkInput("Date visite *","dateVisite","date"));
-  container.appendChild(mkInput("Spawter collecteur *","spawter"));
-  container.appendChild(mkInput("Téléphone","telephone","tel"));
-  container.appendChild(mkChips("Présence digitale", C.digital, "digital"));
-  container.appendChild(mkInput("URL / Handle","urlHandle"));
+  container.appendChild(mkGroup("Visite", [
+    mkInput("Date visite <span class='req'>*</span>","dateVisite","date"),
+    mkInput("Spawter collecteur <span class='req'>*</span>","spawter","text","Votre nom"),
+  ], "📅"));
+
+  container.appendChild(mkGroup("Contact (optionnel)", [
+    mkInput("Téléphone","telephone","tel","+225 XX XX XX XX XX"),
+    mkChips("Présence digitale", C.digital, "digital"),
+    mkInput("URL / Handle","urlHandle","text","@nom ou https://..."),
+  ], "📱"));
 }
 
 function renderBloc1(container) {
   container.appendChild(mkSection("Typologie & Offre","🍽️"));
-  container.appendChild(mkChips("Type d'établissement", C.types, "types"));
-  container.appendChild(mkInput("Autre type","autreType"));
-  for(let i=0;i<3;i++) container.appendChild(mkArrayInput(`Spécialité ${i+1}`,"specs",i));
-  container.appendChild(mkChips("Cuisine dominante", C.cuisines, "cuisines"));
-  container.appendChild(mkInput("Autre cuisine","autreCuisine"));
-  container.appendChild(mkTextarea("Plats signature observés","platsSignature"));
+  container.appendChild(mkHint("Classifie le lieu et son offre culinaire."));
 
-  container.appendChild(h("label","label","Grille tarifaire (FCFA)"));
+  container.appendChild(mkGroup("Classification", [
+    mkChips("Type d'établissement", C.types, "types"),
+    mkInput("Autre type (si besoin)","autreType","text","Préciser..."),
+  ], "🏷️"));
+
+  container.appendChild(mkGroup("Cuisine & Spécialités", [
+    mkChips("Cuisine dominante", C.cuisines, "cuisines"),
+    mkInput("Autre cuisine","autreCuisine","text","Préciser..."),
+    mkArrayInput("Spécialité 1","specs",0,"Ex: Attiéké poisson"),
+    mkArrayInput("Spécialité 2","specs",1,"Ex: Alloco"),
+    mkArrayInput("Spécialité 3","specs",2,"Ex: Kédjénou"),
+    mkTextarea("Plats signature observés","platsSignature","Ce qui les distingue..."),
+  ], "👨‍🍳"));
+
   const g = h("div","grid2");
-  g.appendChild(mkInput("Éco min","ecoMin","number"));
-  g.appendChild(mkInput("Éco max","ecoMax","number"));
-  g.appendChild(mkInput("Moyen min","moyMin","number"));
-  g.appendChild(mkInput("Moyen max","moyMax","number"));
-  g.appendChild(mkInput("Premium min","premMin","number"));
-  g.appendChild(mkInput("Premium max","premMax","number"));
-  g.appendChild(mkInput("Boissons min","boissMin","number"));
-  g.appendChild(mkInput("Boissons max","boissMax","number"));
-  container.appendChild(g);
-  container.appendChild(mkChips("Menu", C.menu, "menuType"));
+  g.appendChild(mkInput("Éco min","ecoMin","number","FCFA"));
+  g.appendChild(mkInput("Éco max","ecoMax","number","FCFA"));
+  g.appendChild(mkInput("Moyen min","moyMin","number","FCFA"));
+  g.appendChild(mkInput("Moyen max","moyMax","number","FCFA"));
+  g.appendChild(mkInput("Premium min","premMin","number","FCFA"));
+  g.appendChild(mkInput("Premium max","premMax","number","FCFA"));
+  g.appendChild(mkInput("Boissons min","boissMin","number","FCFA"));
+  g.appendChild(mkInput("Boissons max","boissMax","number","FCFA"));
+  container.appendChild(mkGroup("Grille tarifaire (FCFA)", [g, mkChips("Format du menu", C.menu, "menuType")], "💰"));
 }
 
 function renderBloc2(container) {
   container.appendChild(mkSection("ADN Quantifié","🧬"));
-  container.appendChild(mkSlider("BUDGET (repas complet 1 pers)","budget","<2000F",">15000F"));
-  container.appendChild(mkInput("Estimation FCFA","budgetEst","number"));
-  container.appendChild(mkSlider("CADENCE (vitesse service)","cadence","Très lent","Ultra rapide"));
-  container.appendChild(mkInput("Temps d'attente (min)","tempsAtt","number"));
-  container.appendChild(mkSlider("AMBIANCE (formalité)","ambiance","Décontracté","Très formel"));
-  container.appendChild(mkInput("Notes ambiance","ambianceN"));
-  container.appendChild(mkSlider("SOCIABILITÉ","sociabilite","Solo-friendly","Groupes"));
-  container.appendChild(mkInput("Notes sociabilité","sociabiliteN"));
-  container.appendChild(mkSlider("NOTORIÉTÉ","notoriete","Bouche-à-oreille","Institution"));
-  container.appendChild(mkInput("Notes notoriété","notorieteN"));
+  container.appendChild(mkHint("Évalue les 5 dimensions clés du lieu sur une échelle de 1 à 12."));
+
+  container.appendChild(mkGroup("Budget", [
+    mkSlider("Repas complet pour 1 personne","budget","< 2 000 F","> 15 000 F","🪙","💎"),
+    mkInput("Estimation précise (FCFA)","budgetEst","number","Ex: 3500"),
+  ], "💰"));
+
+  container.appendChild(mkGroup("Cadence", [
+    mkSlider("Vitesse du service","cadence","Très lent","Ultra rapide","🐌","⚡"),
+    mkInput("Temps d'attente observé (min)","tempsAtt","number","Ex: 15"),
+  ], "⏱️"));
+
+  container.appendChild(mkGroup("Ambiance", [
+    mkSlider("Niveau de formalité","ambiance","Décontracté","Très formel","😎","🎩"),
+    mkInput("Notes ambiance","ambianceN","text","Décris l'ambiance..."),
+  ], "🎭"));
+
+  container.appendChild(mkGroup("Sociabilité", [
+    mkSlider("Dynamique sociale","sociabilite","Solo-friendly","Groupes","🧘","👥"),
+    mkInput("Notes sociabilité","sociabiliteN","text","Type de fréquentation..."),
+  ], "👥"));
+
+  container.appendChild(mkGroup("Notoriété", [
+    mkSlider("Niveau de connaissance","notoriete","Bouche-à-oreille","Institution","🤫","🏛️"),
+    mkInput("Notes notoriété","notorieteN","text","Comment les gens connaissent..."),
+  ], "📣"));
 }
 
 function renderBloc3(container) {
   container.appendChild(mkSection("Profil Opérationnel","⏰"));
-  container.appendChild(h("label","label","Horaires"));
+  container.appendChild(mkHint("Horaires, capacité et services pratiques du lieu."));
 
-  const g = h("div","grid-time");
-  g.appendChild(h("span","mini-label","L-V"));
-  g.appendChild(mkInput(null,"hLVde","time"));
-  g.appendChild(h("span","mini-label","à"));
-  g.appendChild(mkInput(null,"hLVa","time"));
-  g.appendChild(h("span","mini-label","Sam"));
-  g.appendChild(mkInput(null,"hSde","time"));
-  g.appendChild(h("span","mini-label","à"));
-  g.appendChild(mkInput(null,"hSa","time"));
-  g.appendChild(h("span","mini-label","Dim"));
-  g.appendChild(mkInput(null,"hDde","time"));
-  g.appendChild(h("span","mini-label","à"));
-  g.appendChild(mkInput(null,"hDa","time"));
-  container.appendChild(g);
-
-  container.appendChild(mkToggle("Dimanche fermé","dimFerme"));
-  container.appendChild(mkChips("Service continu?",["Oui","Non"],"continu",false));
-  if(state.current.continu==="Non") container.appendChild(mkInput("Coupures","coupures"));
-  container.appendChild(mkInput("Jours de fermeture hebdo","joursFerm"));
+  const timeGrid = h("div","grid-time");
+  timeGrid.appendChild(h("span","mini-label","L-V"));
+  timeGrid.appendChild(mkInput(null,"hLVde","time"));
+  timeGrid.appendChild(h("span","mini-label","à"));
+  timeGrid.appendChild(mkInput(null,"hLVa","time"));
+  timeGrid.appendChild(h("span","mini-label","Sam"));
+  timeGrid.appendChild(mkInput(null,"hSde","time"));
+  timeGrid.appendChild(h("span","mini-label","à"));
+  timeGrid.appendChild(mkInput(null,"hSa","time"));
+  timeGrid.appendChild(h("span","mini-label","Dim"));
+  timeGrid.appendChild(mkInput(null,"hDde","time"));
+  timeGrid.appendChild(h("span","mini-label","à"));
+  timeGrid.appendChild(mkInput(null,"hDa","time"));
+  const horaireChildren = [timeGrid, mkToggle("Dimanche fermé","dimFerme"), mkChips("Service continu ?",["Oui","Non"],"continu",false)];
+  if(state.current.continu==="Non") horaireChildren.push(mkInput("Horaires de coupure","coupures","text","Ex: 14h-18h"));
+  horaireChildren.push(mkInput("Jours de fermeture hebdo","joursFerm","text","Ex: Lundi"));
+  container.appendChild(mkGroup("Horaires", horaireChildren, "🕐"));
 
   const cap = h("div","grid2");
-  cap.appendChild(mkInput("Places intérieur","capInt","number"));
-  cap.appendChild(mkInput("Places extérieur","capExt","number"));
-  container.appendChild(cap);
+  cap.appendChild(mkInput("Places intérieur","capInt","number","Ex: 30"));
+  cap.appendChild(mkInput("Places extérieur","capExt","number","Ex: 20"));
+  container.appendChild(mkGroup("Capacité d'accueil", [cap], "💺"));
 
-  container.appendChild(mkChips("Paiements acceptés", C.paiements, "paiements"));
-  container.appendChild(mkChips("Parking", C.parking, "parking", false));
-  container.appendChild(mkInput("Précisions parking","parkingN"));
-  container.appendChild(mkChips("Services additionnels", C.services, "services"));
+  container.appendChild(mkGroup("Moyens de paiement", [
+    mkChips(null, C.paiements, "paiements"),
+  ], "💳"));
+
+  container.appendChild(mkGroup("Accessibilité", [
+    mkChips("Parking", C.parking, "parking", false),
+    mkInput("Précisions parking","parkingN","text","Détails stationnement..."),
+  ], "🅿️"));
+
+  container.appendChild(mkGroup("Services additionnels", [
+    mkChips(null, C.services, "services"),
+  ], "🛎️"));
 }
 
 function renderBloc4(container) {
   container.appendChild(mkSection("Évaluation Spawter","⭐"));
-  container.appendChild(mkToggle("Test effectué","tested"));
+  container.appendChild(mkHint("Ton avis personnel après la visite ou le test."));
+
+  container.appendChild(mkGroup("As-tu testé ?", [mkToggle("Test effectué","tested")], "🍴"));
 
   if(state.current.tested) {
-    container.appendChild(mkInput("Plat(s) testé(s)","platsTestes"));
-    container.appendChild(mkInput("Budget test (FCFA)","budgetTest","number"));
-    container.appendChild(h("label","label","Évaluation globale"));
-    container.appendChild(mkStars("eval"));
-    for(let i=0;i<3;i++) container.appendChild(mkArrayInput(`Point fort ${i+1}`,"forts",i));
-    for(let i=0;i<3;i++) container.appendChild(mkArrayInput(`Point faible ${i+1}`,"faibles",i));
+    container.appendChild(mkGroup("Détails du test", [
+      mkInput("Plat(s) testé(s)","platsTestes","text","Qu'as-tu commandé ?"),
+      mkInput("Budget dépensé (FCFA)","budgetTest","number","Ex: 5000"),
+      h("label","label","Évaluation globale"),
+      mkStars("eval"),
+    ], "🧪"));
+
+    container.appendChild(mkGroup("Points forts", [
+      mkArrayInput(null,"forts",0,"Point fort #1"),
+      mkArrayInput(null,"forts",1,"Point fort #2"),
+      mkArrayInput(null,"forts",2,"Point fort #3"),
+    ], "👍"));
+
+    container.appendChild(mkGroup("Points faibles", [
+      mkArrayInput(null,"faibles",0,"Point faible #1"),
+      mkArrayInput(null,"faibles",1,"Point faible #2"),
+      mkArrayInput(null,"faibles",2,"Point faible #3"),
+    ], "👎"));
   }
 
-  container.appendChild(mkChips("Tags émotionnels", C.tags, "tags"));
-  container.appendChild(mkChips("Recommandable?", C.reco, "reco", false));
-  container.appendChild(mkInput("Phrase d'accroche (pour l'app)","accroche"));
+  container.appendChild(mkGroup("Impression générale", [
+    mkChips("Tags émotionnels", C.tags, "tags"),
+    mkChips("Recommandable ?", C.reco, "reco", false),
+    mkInput("Phrase d'accroche (pour l'app)","accroche","text","La phrase qui résume ce lieu..."),
+  ], "💬"));
 }
 
 function renderBloc5(container) {
   container.appendChild(mkSection("Intelligence Terrain","🔍"));
-  container.appendChild(mkChips("Clientèle observée", C.clientele, "clientele"));
-  container.appendChild(mkChips("Moment optimal", C.moments, "moments"));
-  container.appendChild(mkChips("Affluence observée", C.affluence, "affluence", false));
-  container.appendChild(mkChips("Niveau sonore", C.sonore, "sonore", false));
-  container.appendChild(mkChips("Propreté", C.proprete, "proprete", false));
-  container.appendChild(mkInput("Nombre de serveurs","serveurs","number"));
-  container.appendChild(mkChips("Accueil", C.accueil, "accueil", false));
-  container.appendChild(mkChips("Potentiel Spawt", C.potentiel, "potentiel", false));
-  container.appendChild(mkTextarea("Notes libres terrain","notes","",4));
+  container.appendChild(mkHint("Ce que tu observes sur place : la clientèle, l'ambiance, la qualité."));
+
+  container.appendChild(mkGroup("Ambiance du moment", [
+    mkChips("Clientèle observée", C.clientele, "clientele"),
+    mkChips("Moment optimal", C.moments, "moments"),
+    mkChips("Affluence", C.affluence, "affluence", false),
+    mkChips("Niveau sonore", C.sonore, "sonore", false),
+  ], "👀"));
+
+  container.appendChild(mkGroup("Qualité du lieu", [
+    mkChips("Propreté", C.proprete, "proprete", false),
+    mkInput("Nombre de serveurs","serveurs","number","Ex: 3"),
+    mkChips("Qualité de l'accueil", C.accueil, "accueil", false),
+  ], "✨"));
+
+  container.appendChild(mkGroup("Verdict Spawt", [
+    mkChips("Potentiel", C.potentiel, "potentiel", false),
+    mkTextarea("Notes libres terrain","notes","Tout ce qui te semble important...",4),
+  ], "🎯"));
 }
 
 function renderBloc6(container) {
   container.appendChild(mkSection("Approche B2B","🤝"));
-  container.appendChild(mkChips("Contact établi?",["Oui","Non","À recontacter"],"contactEtabli",false));
+  container.appendChild(mkHint("Si tu as eu un contact avec le gérant ou le propriétaire."));
+
+  container.appendChild(mkGroup("Statut du contact", [
+    mkChips("Contact établi ?",["Oui","Non","À recontacter"],"contactEtabli",false),
+  ], "📞"));
 
   if(state.current.contactEtabli==="Oui") {
-    container.appendChild(mkInput("Contact nom","contactNom"));
-    container.appendChild(mkChips("Fonction", C.fonction, "fonction", false));
-    container.appendChild(mkChips("Réceptivité", C.receptivite, "receptivite", false));
-    container.appendChild(mkToggle("RDV planifié","rdv"));
-    if(state.current.rdv) container.appendChild(mkInput("Date RDV","rdvDate","date"));
-    container.appendChild(mkChips("Matériel laissé", C.materiel, "materiel"));
+    const contactChildren = [
+      mkInput("Nom du contact","contactNom","text","Prénom Nom"),
+      mkChips("Fonction", C.fonction, "fonction", false),
+      mkChips("Réceptivité", C.receptivite, "receptivite", false),
+      mkToggle("RDV planifié","rdv"),
+    ];
+    if(state.current.rdv) contactChildren.push(mkInput("Date du RDV","rdvDate","date"));
+    contactChildren.push(mkChips("Matériel laissé", C.materiel, "materiel"));
+    container.appendChild(mkGroup("Détails du contact", contactChildren, "🤝"));
   }
 
-  container.appendChild(mkTextarea("Notes approche commerciale","notesB2B","",3));
+  container.appendChild(mkGroup("Notes", [
+    mkTextarea("Notes approche commerciale","notesB2B","Résumé de l'échange, prochaines étapes...",3),
+  ], "📝"));
+
+  // Summary before save on last bloc
+  renderSummary(container);
+}
+
+function renderSummary(container) {
+  const e = state.current;
+  container.appendChild(mkSection("Récapitulatif","📋"));
+  container.appendChild(mkHint("Aperçu rapide avant de sauvegarder."));
+
+  const card = h("div","summary-card");
+  const rows = [
+    ["Nom", e.nom],
+    ["Quartier", e.quartier],
+    ["Type", (e.types||[]).join(", ")],
+    ["Cuisine", (e.cuisines||[]).join(", ")],
+    ["Potentiel", (() => { const p = C.potentiel.find(x=>x.id===e.potentiel); return p ? `${p.e} ${p.l}` : ""; })()],
+    ["Recommandable", e.reco],
+    ["Budget /12", e.budget ? String(e.budget) : ""],
+    ["Test effectué", e.tested ? "Oui" : "Non"],
+    ["Contact B2B", e.contactEtabli],
+  ];
+  rows.forEach(([k, v]) => {
+    const row = h("div","summary-row");
+    row.appendChild(h("span","summary-key",k));
+    row.appendChild(h("span", v ? "summary-val" : "summary-val empty", v || "—"));
+    card.appendChild(row);
+  });
+  container.appendChild(card);
 }
 
 const BLOCS = [
-  {t:"Identification",i:"📍",r:renderBloc0},
-  {t:"Typologie",i:"🍽️",r:renderBloc1},
+  {t:"Identif.",i:"📍",r:renderBloc0},
+  {t:"Offre",i:"🍽️",r:renderBloc1},
   {t:"ADN",i:"🧬",r:renderBloc2},
-  {t:"Opérations",i:"⏰",r:renderBloc3},
-  {t:"Évaluation",i:"⭐",r:renderBloc4},
+  {t:"Opéra.",i:"⏰",r:renderBloc3},
+  {t:"Éval.",i:"⭐",r:renderBloc4},
   {t:"Terrain",i:"🔍",r:renderBloc5},
   {t:"B2B",i:"🤝",r:renderBloc6},
 ];
@@ -511,6 +815,7 @@ function exportCSV() {
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
+  showToast(`${state.entries.length} entrée(s) exportée(s)`,"success","📊");
 }
 
 // ─── Render: List View ───────────────────────────────────────────
@@ -543,10 +848,37 @@ function renderList() {
   hdr.appendChild(right);
   app.appendChild(hdr);
 
+  // Draft recovery banner
+  const draft = loadDraft();
+  if(draft && draft.entry) {
+    const isExisting = state.entries.some(x => x.id === draft.entry.id);
+    const age = Date.now() - (draft.ts || 0);
+    if(age < 86400000) { // < 24h
+      const banner = h("div","draft-banner");
+      const name = draft.entry.nom || "Sans nom";
+      banner.appendChild(h("span","draft-banner-text",`📝 Brouillon : ${name}`));
+      const actions = h("div","draft-banner-actions");
+      const restoreBtn = h("button","btn btn-draft-restore","Reprendre");
+      restoreBtn.addEventListener("click", () => {
+        state.current = draft.entry;
+        state.bloc = draft.bloc || 0;
+        state.view = "form";
+        renderForm();
+        showToast("Brouillon restauré","success","📝");
+      });
+      const dismissBtn = h("button","btn btn-draft-dismiss","Ignorer");
+      dismissBtn.addEventListener("click", () => { clearDraft(); renderList(); });
+      actions.appendChild(restoreBtn);
+      actions.appendChild(dismissBtn);
+      banner.appendChild(actions);
+      app.appendChild(banner);
+    }
+  }
+
   // Search + Filter
   if(state.entries.length > 0) {
     const sb = h("div","search-bar");
-    const si = h("input","input",null,{type:"text",placeholder:"Rechercher un lieu..."});
+    const si = h("input","input",null,{type:"text",placeholder:"🔍  Rechercher un lieu..."});
     si.value = state.search;
     si.addEventListener("input", e => { state.search = e.target.value; renderList(); });
     sb.appendChild(si);
@@ -557,7 +889,7 @@ function renderList() {
     allBtn.addEventListener("click", () => { state.filterPot = ""; renderList(); });
     fr.appendChild(allBtn);
     C.potentiel.forEach(p => {
-      const fb = h("button",`filter-chip${state.filterPot===p.id?" active":""}`,p.e);
+      const fb = h("button",`filter-chip${state.filterPot===p.id?" active":""}`,`${p.e} ${p.l}`);
       fb.addEventListener("click", () => { state.filterPot = state.filterPot===p.id?"":p.id; renderList(); });
       fr.appendChild(fb);
     });
@@ -575,10 +907,10 @@ function renderList() {
   if(filtered.length === 0 && state.entries.length === 0) {
     const em = h("div","empty");
     em.appendChild(h("div","empty-ico","🍽️"));
-    em.appendChild(h("div","empty-txt",`Aucun lieu collecté.<br>Appuie sur <span style="color:var(--accent)">+ Nouveau</span> pour commencer.`));
+    em.appendChild(h("div","empty-txt",`Aucun lieu collecté pour le moment.<br><br>Appuie sur <span style="color:var(--accent);font-weight:700">+ Nouveau</span> pour commencer ta collecte.`));
     list.appendChild(em);
   } else if(filtered.length === 0) {
-    list.appendChild(h("div","empty",`<div style="padding:40px;color:var(--muted)">Aucun résultat</div>`));
+    list.appendChild(h("div","empty",`<div style="padding:40px;color:var(--muted)">Aucun résultat pour cette recherche</div>`));
   }
 
   filtered.forEach(entry => {
@@ -597,11 +929,11 @@ function renderList() {
     if(meta) info.appendChild(h("div","entry-meta",meta));
     top.appendChild(info);
 
-    const right = h("div",null,null);
-    right.style.cssText = "display:flex;flex-direction:column;align-items:flex-end;gap:4px";
-    right.appendChild(h("span","entry-date",entry.dateVisite));
-    if(entry.tested && entry.eval) right.appendChild(h("span",null,"⭐".repeat(entry.eval)));
-    top.appendChild(right);
+    const rightCol = h("div",null,null);
+    rightCol.style.cssText = "display:flex;flex-direction:column;align-items:flex-end;gap:4px";
+    rightCol.appendChild(h("span","entry-date",entry.dateVisite));
+    if(entry.tested && entry.eval) rightCol.appendChild(h("span",null,"⭐".repeat(entry.eval)));
+    top.appendChild(rightCol);
     card.appendChild(top);
 
     if(entry.accroche) card.appendChild(h("div","entry-accroche",`"${entry.accroche}"`));
@@ -628,14 +960,17 @@ function renderForm() {
   const hdr = h("div","header");
   const backBtn = h("button","btn btn-back","✕");
   backBtn.addEventListener("click", () => {
-    if(confirm("Quitter sans sauvegarder?")) { state.view = "list"; renderList(); }
+    showConfirm("Quitter le formulaire ?",
+      "Ton brouillon est sauvegardé automatiquement, tu pourras le reprendre plus tard.",
+      "Quitter", () => { state.view = "list"; renderList(); });
   });
   hdr.appendChild(backBtn);
 
   const center = h("div",null,null);
-  center.style.cssText = "flex:1;text-align:center";
-  center.appendChild(h("div",null,`<span style="font-weight:700;font-size:14px">${e.nom||"Nouveau lieu"}</span>`));
-  center.appendChild(h("div",null,`<span style="font-size:11px;color:var(--dim)">${BLOCS[state.bloc].i} ${BLOCS[state.bloc].t}</span>`));
+  center.style.cssText = "flex:1;text-align:center;overflow:hidden";
+  center.appendChild(h("div",null,`<span style="font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block">${e.nom||"Nouveau lieu"}</span>`));
+  const pct = Math.round(calcTotalProgress() * 100);
+  center.appendChild(h("div",null,`<span style="font-size:11px;color:var(--dim)">${BLOCS[state.bloc].i} ${BLOCS[state.bloc].t} · ${pct}% complété</span>`));
   hdr.appendChild(center);
 
   const saveBtn = h("button","btn btn-save","💾");
@@ -643,20 +978,44 @@ function renderForm() {
   hdr.appendChild(saveBtn);
   app.appendChild(hdr);
 
+  // Progress bar
+  const progBar = h("div","progress-bar");
+  const progFill = h("div","progress-fill");
+  progFill.style.width = pct + "%";
+  progBar.appendChild(progFill);
+  app.appendChild(progBar);
+
   // Bloc nav
   const nav = h("div","bloc-nav");
   BLOCS.forEach((b, i) => {
     const tab = h("button",`bloc-tab${i===state.bloc?" active":""}`,`<span class="ico">${b.i}</span>${b.t}`);
-    tab.addEventListener("click", () => { state.bloc = i; renderForm(); });
+    const prog = calcBlocProgress(i);
+    const dotClass = prog >= 1 ? "complete" : prog > 0 ? "partial" : "empty";
+    const dot = h("span",`dot ${dotClass}`);
+    tab.appendChild(dot);
+    tab.addEventListener("click", () => {
+      state.prevBloc = state.bloc;
+      state.bloc = i;
+      renderForm();
+    });
     nav.appendChild(tab);
   });
   app.appendChild(nav);
 
+  // Scroll to active tab
+  requestAnimationFrame(() => {
+    const activeTab = $(".bloc-tab.active", nav);
+    if(activeTab) activeTab.scrollIntoView({behavior:"smooth",block:"nearest",inline:"center"});
+  });
+
   // Form content
-  const scroll = h("div","scroll");
+  const direction = state.bloc >= (state.prevBloc||0) ? "slide-in" : "slide-in-reverse";
+  const scroll = h("div",`scroll ${direction}`);
   scroll.id = "form-scroll";
   BLOCS[state.bloc].r(scroll);
-  app.appendChild(scroll);
+
+  // Spacer for bottom bar
+  scroll.appendChild(h("div",null,null)).style.height = "24px";
 
   // Delete button for existing entries
   const isExisting = state.entries.some(x => x.id === e.id);
@@ -665,29 +1024,38 @@ function renderForm() {
     delWrap.style.cssText = "text-align:center;padding:16px 0 8px";
     const delBtn = h("button","btn btn-danger","Supprimer ce lieu");
     delBtn.addEventListener("click", () => {
-      if(confirm("Supprimer ce lieu?")) {
-        state.entries = state.entries.filter(x => x.id !== e.id);
-        save();
-        state.view = "list";
-        renderList();
-      }
+      showConfirm("Supprimer ce lieu ?",
+        `"${e.nom||"Sans nom"}" sera définitivement supprimé.`,
+        "Supprimer", () => {
+          state.entries = state.entries.filter(x => x.id !== e.id);
+          save();
+          clearDraft();
+          state.view = "list";
+          renderList();
+          showToast("Lieu supprimé","info","🗑️");
+        }, true);
     });
     delWrap.appendChild(delBtn);
     scroll.appendChild(delWrap);
   }
 
+  app.appendChild(scroll);
+
+  // Setup swipe
+  setupSwipe(scroll);
+
   // Bottom nav
   const bottom = h("div","bottom-bar");
-  const prevBtn = h("button","btn btn-nav","← Précédent");
-  if(state.bloc === 0) prevBtn.style.opacity = ".3";
+  const prevBtn = h("button","btn btn-nav",`← ${state.bloc > 0 ? BLOCS[state.bloc-1].t : ""}`);
+  if(state.bloc === 0) { prevBtn.style.opacity = ".3"; prevBtn.textContent = "←"; }
   prevBtn.addEventListener("click", () => {
-    if(state.bloc > 0) { state.bloc--; renderForm(); }
+    if(state.bloc > 0) { state.prevBloc = state.bloc; state.bloc--; renderForm(); }
   });
   bottom.appendChild(prevBtn);
 
   if(state.bloc < BLOCS.length - 1) {
-    const nextBtn = h("button","btn btn-nav-primary","Suivant →");
-    nextBtn.addEventListener("click", () => { state.bloc++; renderForm(); });
+    const nextBtn = h("button","btn btn-nav-primary",`${BLOCS[state.bloc+1].t} →`);
+    nextBtn.addEventListener("click", () => { state.prevBloc = state.bloc; state.bloc++; renderForm(); });
     bottom.appendChild(nextBtn);
   } else {
     const saveBtn2 = h("button","btn btn-nav-primary","✓ Sauvegarder");
@@ -697,16 +1065,46 @@ function renderForm() {
   app.appendChild(bottom);
 }
 
+// ─── Swipe Between Blocs ─────────────────────────────────────────
+function setupSwipe(el) {
+  let startX = 0, startY = 0, startTime = 0;
+  el.addEventListener("touchstart", e => {
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+    startTime = Date.now();
+  }, {passive:true});
+  el.addEventListener("touchend", e => {
+    const dx = e.changedTouches[0].clientX - startX;
+    const dy = e.changedTouches[0].clientY - startY;
+    const dt = Date.now() - startTime;
+    if(Math.abs(dx) > 70 && Math.abs(dx) > Math.abs(dy) * 1.8 && dt < 400) {
+      if(dx > 0 && state.bloc > 0) {
+        state.prevBloc = state.bloc; state.bloc--; renderForm();
+      } else if(dx < 0 && state.bloc < BLOCS.length - 1) {
+        state.prevBloc = state.bloc; state.bloc++; renderForm();
+      }
+    }
+  }, {passive:true});
+}
+
+// ─── Save ────────────────────────────────────────────────────────
 function doSave() {
-  const idx = state.entries.findIndex(x => x.id === state.current.id);
+  const e = state.current;
+  // Remember spawter name
+  if(e.spawter) {
+    try { localStorage.setItem(SPAWTER_KEY, e.spawter); } catch(ex) {}
+  }
+  const idx = state.entries.findIndex(x => x.id === e.id);
   if(idx >= 0) {
-    state.entries[idx] = state.current;
+    state.entries[idx] = e;
   } else {
-    state.entries.unshift(state.current);
+    state.entries.unshift(e);
   }
   save();
+  clearDraft();
   state.view = "list";
   renderList();
+  showToast(`"${e.nom||"Nouveau lieu"}" sauvegardé !`,"success","✓");
 }
 
 // ─── Init ────────────────────────────────────────────────────────
