@@ -1,21 +1,22 @@
 #!/usr/bin/env python3
-"""Generate SPAWT field collection Excel template with data validation & formatting."""
+"""Generate SPAWT individual form sheets — one A4 page per lieu."""
 
 from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.datavalidation import DataValidation
+from openpyxl.worksheet.page import PageMargins
 from datetime import date
 
 wb = Workbook()
 
-# ── Color palette ──
+# ── Palette ──
 GOLD = "B8960C"
 DARK = "1A1A1A"
 WHITE = "FFFFFF"
 BG = "F8F7F4"
 GREEN = "5B8C5A"
-MUTED = "6B7280"
+MUTED = "8B8B8B"
 LIGHT_GOLD = "FFF8E7"
 LIGHT_GREEN = "EFF6EE"
 LIGHT_BLUE = "EBF0FA"
@@ -23,341 +24,500 @@ LIGHT_PINK = "FDF0F0"
 LIGHT_PURPLE = "F3EEFA"
 LIGHT_GREY = "F5F5F5"
 
-# Styles
-header_font = Font(name="Calibri", bold=True, size=11, color=WHITE)
-section_font = Font(name="Calibri", bold=True, size=11, color=GOLD)
-sub_font = Font(name="Calibri", size=10, color=MUTED, italic=True)
-data_font = Font(name="Calibri", size=11, color=DARK)
-title_font = Font(name="Calibri", bold=True, size=14, color=DARK)
+# ── Styles ──
+title_font = Font(name="Calibri", bold=True, size=18, color=DARK)
+section_font = Font(name="Calibri", bold=True, size=11, color=WHITE)
+label_font = Font(name="Calibri", bold=True, size=9, color=MUTED)
+value_font = Font(name="Calibri", size=11, color=DARK)
+hint_font = Font(name="Calibri", size=8, color=MUTED, italic=True)
+checkbox_font = Font(name="Calibri", size=9, color=DARK)
+small_bold = Font(name="Calibri", bold=True, size=10, color=DARK)
 
-header_fill_gold = PatternFill("solid", fgColor=GOLD)
-header_fill_green = PatternFill("solid", fgColor=GREEN)
-header_fill_dark = PatternFill("solid", fgColor=DARK)
+fill_gold = PatternFill("solid", fgColor=GOLD)
+fill_dark = PatternFill("solid", fgColor=DARK)
+fill_green = PatternFill("solid", fgColor=GREEN)
+fill_blue = PatternFill("solid", fgColor="3B82F6")
+fill_red = PatternFill("solid", fgColor="DC2626")
+fill_purple = PatternFill("solid", fgColor="7C3AED")
+fill_grey = PatternFill("solid", fgColor="6B7280")
+fill_bg = PatternFill("solid", fgColor=BG)
+fill_white = PatternFill("solid", fgColor=WHITE)
 fill_light_gold = PatternFill("solid", fgColor=LIGHT_GOLD)
 fill_light_green = PatternFill("solid", fgColor=LIGHT_GREEN)
 fill_light_blue = PatternFill("solid", fgColor=LIGHT_BLUE)
 fill_light_pink = PatternFill("solid", fgColor=LIGHT_PINK)
 fill_light_purple = PatternFill("solid", fgColor=LIGHT_PURPLE)
-fill_light_grey = PatternFill("solid", fgColor=LIGHT_GREY)
-fill_bg = PatternFill("solid", fgColor=BG)
 
 center = Alignment(horizontal="center", vertical="center", wrap_text=True)
-left_wrap = Alignment(horizontal="left", vertical="center", wrap_text=True)
-thin_border = Border(
-    left=Side(style="thin", color="E0E0E0"),
-    right=Side(style="thin", color="E0E0E0"),
-    top=Side(style="thin", color="E0E0E0"),
-    bottom=Side(style="thin", color="E0E0E0"),
+left_top = Alignment(horizontal="left", vertical="top", wrap_text=True)
+left_center = Alignment(horizontal="left", vertical="center", wrap_text=True)
+right_center = Alignment(horizontal="right", vertical="center")
+
+border_thin = Border(
+    left=Side(style="thin", color="D0D0D0"),
+    right=Side(style="thin", color="D0D0D0"),
+    top=Side(style="thin", color="D0D0D0"),
+    bottom=Side(style="thin", color="D0D0D0"),
+)
+border_bottom = Border(bottom=Side(style="thin", color="CCCCCC"))
+border_box = Border(
+    left=Side(style="medium", color="BBBBBB"),
+    right=Side(style="medium", color="BBBBBB"),
+    top=Side(style="medium", color="BBBBBB"),
+    bottom=Side(style="medium", color="BBBBBB"),
 )
 
-# ── Data constants (mirror from app) ──
-TYPES = "Maquis,Restaurant,Gargote,Street food,Bistrot,Fine dining,Snack"
-CUISINES = "Ivoirienne,Africaine (autre),Française,Libanaise,Asiatique,Fast food,Fusion"
-QUARTIERS = "Cocody,Plateau,Marcory,Treichville,Yopougon,Abobo,Adjamé,Koumassi,Port-Bouët,Bingerville,Riviera,2 Plateaux,Angré,Zone 4,Vallon,Bassam,Assinie,Bouaké"
-PAIEMENTS = "Cash,Orange Money,MTN,Moov,Wave,CB,Virement"
-PARKING = "Facile,Modéré,Difficile,Impossible"
-SERVICES = "Livraison,À emporter,Climatisation,WiFi,Terrasse,Bar,Fumeurs acceptés"
-POTENTIEL = "🔥 PÉPITE,❤️ COUP DE CŒUR,✅ SOLIDE,⚠️ MOYEN,❌ SKIP"
-RECO = "Absolument,Oui,Peut-être,Non"
-CLIENTELE = "Cadres/Pro,Étudiants,Familles,Couples,Solo,Touristes,Mixte"
-MOMENTS = "Petit-déj,Déjeuner,Goûter,Dîner,Tard dans la nuit"
-AFFLUENCE = "Vide,Calme,Modérée,Bondé,File d'attente"
-SONORE = "Calme,Ambiance musicale,Animé,Bruyant"
-PROPRETE = "Impeccable,Correcte,Passable,Problématique"
-ACCUEIL = "Chaleureux,Pro,Distant,Désagréable"
-TAGS = "🎯 Exact,🤩 Surprise,💸 Qualité-prix,😐 Banal,😞 Décevant"
-RECEPTIVITE = "Très intéressé,Ouvert,Sceptique,Refus"
-FONCTION = "Propriétaire,Gérant,Responsable"
-MATERIEL = "Flyer,Pitch deck,Carte de visite"
-MENU_TYPE = "Carte physique photographiée,Ardoise,Verbal uniquement"
-DIGITAL = "WhatsApp,Facebook,Instagram,Site web"
-OUI_NON = "Oui,Non"
+# ── Validation data ──
+VALIDATIONS = {
+    "quartier": "Cocody,Plateau,Marcory,Treichville,Yopougon,Abobo,Adjamé,Koumassi,Port-Bouët,Bingerville,Riviera,2 Plateaux,Angré,Zone 4,Vallon,Bassam,Assinie,Bouaké",
+    "type": "Maquis,Restaurant,Gargote,Street food,Bistrot,Fine dining,Snack",
+    "cuisine": "Ivoirienne,Africaine (autre),Française,Libanaise,Asiatique,Fast food,Fusion",
+    "parking": "Facile,Modéré,Difficile,Impossible",
+    "potentiel": "PÉPITE,COUP DE CŒUR,SOLIDE,MOYEN,SKIP",
+    "reco": "Absolument,Oui,Peut-être,Non",
+    "affluence": "Vide,Calme,Modérée,Bondé,File d'attente",
+    "sonore": "Calme,Ambiance musicale,Animé,Bruyant",
+    "proprete": "Impeccable,Correcte,Passable,Problématique",
+    "accueil": "Chaleureux,Pro,Distant,Désagréable",
+    "receptivite": "Très intéressé,Ouvert,Sceptique,Refus",
+    "fonction": "Propriétaire,Gérant,Responsable",
+}
 
-# ═══════════════════════════════════════════════════════════════
-# SHEET 1 — Fiches de collecte (main data entry)
-# ═══════════════════════════════════════════════════════════════
-ws = wb.active
-ws.title = "Fiches SPAWT"
-ws.sheet_properties.tabColor = GOLD
 
-# Columns definition: (header, sub_hint, width, section_fill, validation_list_or_None)
-COLUMNS = [
-    # ── BLOC 1 : Identification ──
-    ("N°", "Auto", 5, fill_light_grey, None),
-    ("Date visite", "JJ/MM/AAAA", 14, fill_light_gold, None),
-    ("Spawter", "Qui collecte", 16, fill_light_gold, None),
-    ("Nom du lieu", "Obligatoire", 28, fill_light_gold, None),
-    ("Adresse", "Rue, repère", 30, fill_light_gold, None),
-    ("Quartier", "Liste", 16, fill_light_gold, QUARTIERS),
-    ("GPS Lat", "Decimal", 12, fill_light_gold, None),
-    ("GPS Long", "Decimal", 12, fill_light_gold, None),
-    ("Téléphone", "+225...", 16, fill_light_gold, None),
-    ("Digital", "WhatsApp, FB...", 20, fill_light_gold, DIGITAL),
-    # ── BLOC 2 : Offre ──
-    ("Type", "Maquis, Resto...", 18, fill_light_green, TYPES),
-    ("Cuisine(s)", "Ivoirienne...", 20, fill_light_green, CUISINES),
-    ("Spécialité 1", "Plat phare", 20, fill_light_green, None),
-    ("Spécialité 2", "", 20, fill_light_green, None),
-    ("Spécialité 3", "", 20, fill_light_green, None),
-    ("Plats signature", "Détails", 25, fill_light_green, None),
-    ("Type de menu", "Carte, ardoise", 22, fill_light_green, MENU_TYPE),
-    # ── BLOC 3 : Prix ──
-    ("Prix éco min (F)", "CFA", 14, fill_light_blue, None),
-    ("Prix éco max (F)", "CFA", 14, fill_light_blue, None),
-    ("Prix moyen min (F)", "CFA", 14, fill_light_blue, None),
-    ("Prix moyen max (F)", "CFA", 14, fill_light_blue, None),
-    ("Prix premium min (F)", "CFA", 15, fill_light_blue, None),
-    ("Prix premium max (F)", "CFA", 15, fill_light_blue, None),
-    ("Boissons min (F)", "CFA", 14, fill_light_blue, None),
-    ("Boissons max (F)", "CFA", 14, fill_light_blue, None),
-    ("Budget /12", "1=bas 12=haut", 11, fill_light_blue, None),
-    ("Cadence /12", "1=lent 12=rapide", 12, fill_light_blue, None),
-    # ── BLOC 4 : Logistique ──
-    ("Horaires L-V", "ex: 07h-22h", 14, fill_light_grey, None),
-    ("Horaires Sam", "ex: 08h-23h", 14, fill_light_grey, None),
-    ("Horaires Dim", "ex: Fermé", 14, fill_light_grey, None),
-    ("Capacité int.", "nb places", 11, fill_light_grey, None),
-    ("Capacité ext.", "nb places", 11, fill_light_grey, None),
-    ("Paiements", "Cash, OM...", 20, fill_light_grey, PAIEMENTS),
-    ("Parking", "Facile → Impossible", 14, fill_light_grey, PARKING),
-    ("Services", "WiFi, terrasse...", 22, fill_light_grey, SERVICES),
-    # ── BLOC 5 : Dégustation ──
-    ("Testé ?", "Oui/Non", 9, fill_light_pink, OUI_NON),
-    ("Plats testés", "Détails", 25, fill_light_pink, None),
-    ("Budget test (F)", "CFA dépensé", 14, fill_light_pink, None),
-    ("Note /5", "⭐", 8, fill_light_pink, None),
-    ("Points forts", "3 max, virgules", 30, fill_light_pink, None),
-    ("Points faibles", "3 max, virgules", 30, fill_light_pink, None),
-    ("Tag ressenti", "🎯🤩💸😐😞", 18, fill_light_pink, TAGS),
-    ("Recommandation", "Absolument → Non", 16, fill_light_pink, RECO),
-    ("Accroche", "Phrase clé", 30, fill_light_pink, None),
-    # ── BLOC 6 : Ambiance ──
-    ("Ambiance /12", "1=simple 12=haut", 12, fill_light_purple, None),
-    ("Sociabilité /12", "1=intime 12=festif", 13, fill_light_purple, None),
-    ("Notoriété /12", "1=inconnu 12=célèbre", 13, fill_light_purple, None),
-    ("Clientèle", "Cadres, familles...", 22, fill_light_purple, CLIENTELE),
-    ("Moments", "Déjeuner, dîner...", 22, fill_light_purple, MOMENTS),
-    ("Affluence", "Vide → File", 14, fill_light_purple, AFFLUENCE),
-    ("Ambiance sonore", "Calme → Bruyant", 16, fill_light_purple, SONORE),
-    ("Propreté", "Impeccable → Prob.", 14, fill_light_purple, PROPRETE),
-    ("Accueil", "Chaleureux → Dés.", 14, fill_light_purple, ACCUEIL),
-    ("Potentiel SPAWT", "🔥❤️✅⚠️❌", 18, fill_light_purple, POTENTIEL),
-    ("Notes terrain", "Libre", 35, fill_light_purple, None),
-    # ── BLOC 7 : B2B ──
-    ("Contact établi ?", "Oui/Non", 14, fill_light_grey, OUI_NON),
-    ("Nom contact", "Prénom Nom", 20, fill_light_grey, None),
-    ("Fonction", "Proprio, gérant", 16, fill_light_grey, FONCTION),
-    ("Réceptivité", "Intéressé → Refus", 16, fill_light_grey, RECEPTIVITE),
-    ("RDV pris ?", "Oui/Non", 10, fill_light_grey, OUI_NON),
-    ("Date RDV", "JJ/MM/AAAA", 14, fill_light_grey, None),
-    ("Matériel laissé", "Flyer, pitch...", 18, fill_light_grey, MATERIEL),
-    ("Notes B2B", "Suivi", 30, fill_light_grey, None),
-]
-
-# ── Section headers row (row 1) ──
-sections = [
-    (1, 10, "📍 IDENTIFICATION", header_fill_dark),
-    (11, 17, "🍽️ OFFRE & CUISINE", PatternFill("solid", fgColor=GREEN)),
-    (18, 27, "💰 PRIX & RYTHME", PatternFill("solid", fgColor="3B82F6")),
-    (28, 35, "🏢 LOGISTIQUE", PatternFill("solid", fgColor="6B7280")),
-    (36, 44, "⭐ DÉGUSTATION", PatternFill("solid", fgColor="DC2626")),
-    (45, 55, "🎭 AMBIANCE & VERDICT", PatternFill("solid", fgColor="7C3AED")),
-    (56, 63, "🤝 B2B / COMMERCIAL", PatternFill("solid", fgColor="6B7280")),
-]
-
-for start, end, title, fill in sections:
-    ws.merge_cells(start_row=1, start_column=start, end_row=1, end_column=end)
-    cell = ws.cell(row=1, column=start, value=title)
-    cell.font = Font(name="Calibri", bold=True, size=12, color=WHITE)
-    cell.fill = fill
-    cell.alignment = center
-    cell.border = thin_border
-
-# ── Column headers (row 2) + hints (row 3) ──
-for i, (header, hint, width, fill, _) in enumerate(COLUMNS, 1):
-    col_letter = get_column_letter(i)
-    ws.column_dimensions[col_letter].width = width
-
-    # Header
-    cell = ws.cell(row=2, column=i, value=header)
-    cell.font = Font(name="Calibri", bold=True, size=10, color=DARK)
-    cell.fill = fill
-    cell.alignment = center
-    cell.border = thin_border
-
-    # Hint
-    cell_hint = ws.cell(row=3, column=i, value=hint)
-    cell_hint.font = sub_font
-    cell_hint.fill = fill
-    cell_hint.alignment = center
-    cell_hint.border = thin_border
-
-# ── Data validation (dropdowns) ──
-for i, (header, _, _, _, validation_list) in enumerate(COLUMNS, 1):
-    if validation_list:
-        col_letter = get_column_letter(i)
+def add_validation(ws, cell_range, key):
+    """Add dropdown validation to a cell range."""
+    if key in VALIDATIONS:
         dv = DataValidation(
             type="list",
-            formula1=f'"{validation_list}"',
+            formula1=f'"{VALIDATIONS[key]}"',
             allow_blank=True,
             showDropDown=False,
         )
-        dv.error = f"Choisir parmi les options proposées"
-        dv.errorTitle = header
-        dv.prompt = f"Sélectionner : {validation_list.replace(',', ', ')}"
-        dv.promptTitle = header
         dv.showInputMessage = True
-        dv.showErrorMessage = True
+        dv.showErrorMessage = False
         ws.add_data_validation(dv)
-        dv.add(f"{col_letter}4:{col_letter}104")
+        dv.add(cell_range)
 
-# ── Pre-fill 100 rows with formatting + row numbers ──
-today = date.today().strftime("%d/%m/%Y")
-for row in range(4, 104):
-    for i, (_, _, _, _, _) in enumerate(COLUMNS, 1):
-        cell = ws.cell(row=row, column=i)
-        cell.font = data_font
-        cell.alignment = left_wrap
-        cell.border = thin_border
-        # Alternate row colors
-        if row % 2 == 0:
-            cell.fill = PatternFill("solid", fgColor="FAFAFA")
 
-    # N°
-    ws.cell(row=row, column=1, value=row - 3).alignment = center
-    # Date pre-fill
-    ws.cell(row=row, column=2, value=today)
-
-# ── Freeze panes ──
-ws.freeze_panes = "D4"
-
-# ── Row heights ──
-ws.row_dimensions[1].height = 28
-ws.row_dimensions[2].height = 30
-ws.row_dimensions[3].height = 20
-for r in range(4, 104):
-    ws.row_dimensions[r].height = 22
-
-# ═══════════════════════════════════════════════════════════════
-# SHEET 2 — Légende / Guide
-# ═══════════════════════════════════════════════════════════════
-ws2 = wb.create_sheet("Légende & Guide")
-ws2.sheet_properties.tabColor = GREEN
-
-ws2.column_dimensions["A"].width = 25
-ws2.column_dimensions["B"].width = 55
-ws2.column_dimensions["C"].width = 5
-ws2.column_dimensions["D"].width = 25
-ws2.column_dimensions["E"].width = 55
-
-guide_data = [
-    ("SPAWT — Guide de collecte terrain", "", "", "", ""),
-    ("", "", "", "", ""),
-    ("CHAMP", "VALEURS POSSIBLES", "", "CHAMP", "VALEURS POSSIBLES"),
-    ("Type de lieu", TYPES.replace(",", ", "), "", "Potentiel SPAWT", "🔥 PÉPITE — Exceptionnel, priorité absolue"),
-    ("Cuisine(s)", CUISINES.replace(",", ", "), "", "", "❤️ COUP DE CŒUR — Très bon, à suivre"),
-    ("Quartier", QUARTIERS.replace(",", ", "), "", "", "✅ SOLIDE — Bon niveau, fiable"),
-    ("Paiements", PAIEMENTS.replace(",", ", "), "", "", "⚠️ MOYEN — Correct sans plus"),
-    ("Services", SERVICES.replace(",", ", "), "", "", "❌ SKIP — Pas intéressant"),
-    ("Parking", PARKING.replace(",", ", "), "", "", ""),
-    ("", "", "", "Tag ressenti", "🎯 Exact — Conforme aux attentes"),
-    ("ÉCHELLES /12", "SIGNIFICATION", "", "", "🤩 Surprise — Au-delà des attentes"),
-    ("Budget", "1 = très bas → 12 = très cher", "", "", "💸 Qualité-prix — Bon rapport"),
-    ("Cadence", "1 = très lent → 12 = ultra rapide", "", "", "😐 Banal — Rien de marquant"),
-    ("Ambiance", "1 = simple → 12 = luxe/raffiné", "", "", "😞 Décevant — En dessous"),
-    ("Sociabilité", "1 = intime → 12 = festif/convivial", "", "", ""),
-    ("Notoriété", "1 = inconnu → 12 = très célèbre", "", "Recommandation", RECO.replace(",", ", ")),
-    ("", "", "", "Clientèle", CLIENTELE.replace(",", ", ")),
-    ("NOTE /5", "SIGNIFICATION", "", "Moments", MOMENTS.replace(",", ", ")),
-    ("⭐", "Mauvais", "", "Affluence", AFFLUENCE.replace(",", ", ")),
-    ("⭐⭐", "Passable", "", "Ambiance sonore", SONORE.replace(",", ", ")),
-    ("⭐⭐⭐", "Correct", "", "Propreté", PROPRETE.replace(",", ", ")),
-    ("⭐⭐⭐⭐", "Très bon", "", "Accueil", ACCUEIL.replace(",", ", ")),
-    ("⭐⭐⭐⭐⭐", "Exceptionnel", "", "", ""),
-    ("", "", "", "Réceptivité B2B", RECEPTIVITE.replace(",", ", ")),
-    ("", "", "", "Fonction contact", FONCTION.replace(",", ", ")),
-]
-
-for r, (a, b, c, d, e) in enumerate(guide_data, 1):
-    ws2.cell(row=r, column=1, value=a)
-    ws2.cell(row=r, column=2, value=b)
-    ws2.cell(row=r, column=4, value=d)
-    ws2.cell(row=r, column=5, value=e)
-
-# Title
-ws2.merge_cells("A1:E1")
-t = ws2["A1"]
-t.font = Font(name="Calibri", bold=True, size=16, color=DARK)
-t.alignment = Alignment(horizontal="center", vertical="center")
-t.fill = PatternFill("solid", fgColor=LIGHT_GOLD)
-
-# Section headers
-for cell_ref in ["A3", "B3", "D3", "E3"]:
-    c = ws2[cell_ref]
-    c.font = Font(name="Calibri", bold=True, size=11, color=WHITE)
-    c.fill = header_fill_dark
+def make_section_header(ws, row, col_start, col_end, title, fill):
+    """Create a colored section header spanning columns."""
+    ws.merge_cells(start_row=row, start_column=col_start, end_row=row, end_column=col_end)
+    c = ws.cell(row=row, column=col_start, value=title)
+    c.font = section_font
+    c.fill = fill
     c.alignment = center
+    for ci in range(col_start, col_end + 1):
+        ws.cell(row=row, column=ci).fill = fill
+        ws.cell(row=row, column=ci).border = border_thin
 
-for cell_ref in ["A11", "B11"]:
-    c = ws2[cell_ref]
-    c.font = Font(name="Calibri", bold=True, size=11, color=WHITE)
-    c.fill = PatternFill("solid", fgColor=GREEN)
-    c.alignment = center
 
-for cell_ref in ["A18", "B18"]:
-    c = ws2[cell_ref]
-    c.font = Font(name="Calibri", bold=True, size=11, color=WHITE)
-    c.fill = header_fill_gold
-    c.alignment = center
+def make_label_value(ws, row, label_col, label_text, value_col_start, value_col_end,
+                     hint="", row_height=22, validation_key=None):
+    """Create a label + empty value cell for data entry."""
+    # Label
+    c = ws.cell(row=row, column=label_col, value=label_text)
+    c.font = label_font
+    c.alignment = right_center
+    c.fill = fill_bg
 
-# Style all data cells
-for r in range(3, len(guide_data) + 1):
-    for col in [1, 2, 4, 5]:
-        c = ws2.cell(row=r, column=col)
-        if not c.font.bold:
-            c.font = Font(name="Calibri", size=10, color=DARK)
-        c.alignment = left_wrap
-        c.border = thin_border
-    ws2.row_dimensions[r].height = 22
+    # Value cells merged
+    if value_col_start != value_col_end:
+        ws.merge_cells(start_row=row, start_column=value_col_start, end_row=row, end_column=value_col_end)
+    vc = ws.cell(row=row, column=value_col_start)
+    vc.font = value_font
+    vc.alignment = left_center
+    vc.fill = fill_white
+    for ci in range(value_col_start, value_col_end + 1):
+        ws.cell(row=row, column=ci).border = border_thin
 
-ws2.row_dimensions[1].height = 36
+    if hint:
+        vc.value = None
+        # Use comment-style hint via number format or just leave placeholder
+        vc.font = hint_font
 
-# ═══════════════════════════════════════════════════════════════
-# SHEET 3 — Grille prix par quartier (bonus)
-# ═══════════════════════════════════════════════════════════════
-ws3 = wb.create_sheet("Grille Prix Quartiers")
-ws3.sheet_properties.tabColor = "3B82F6"
+    if validation_key:
+        col_letter = get_column_letter(value_col_start)
+        add_validation(ws, f"{col_letter}{row}", validation_key)
 
-price_headers = ["Quartier", "Éco min (F)", "Éco max (F)", "Moyen min (F)", "Moyen max (F)", "Premium min (F)", "Premium max (F)", "Nb lieux"]
-ws3.column_dimensions["A"].width = 20
-for i in range(2, 9):
-    ws3.column_dimensions[get_column_letter(i)].width = 15
+    ws.row_dimensions[row].height = row_height
 
-for i, h_text in enumerate(price_headers, 1):
-    c = ws3.cell(row=1, column=i, value=h_text)
-    c.font = header_font
-    c.fill = PatternFill("solid", fgColor="3B82F6")
-    c.alignment = center
-    c.border = thin_border
 
-quartiers = QUARTIERS.split(",")
-for r, q in enumerate(quartiers, 2):
-    ws3.cell(row=r, column=1, value=q).font = Font(name="Calibri", bold=True, size=11)
-    for col in range(1, 9):
-        c = ws3.cell(row=r, column=col)
-        c.border = thin_border
+def make_checkbox_row(ws, row, col_start, col_end, options, label=""):
+    """Create a row of checkboxes (□ Option1  □ Option2 ...)."""
+    if label:
+        c = ws.cell(row=row, column=col_start, value=label)
+        c.font = label_font
+        c.alignment = right_center
+        c.fill = fill_bg
+        col_start += 1
+
+    text = "    ".join([f"☐ {opt}" for opt in options])
+    ws.merge_cells(start_row=row, start_column=col_start, end_row=row, end_column=col_end)
+    c = ws.cell(row=row, column=col_start, value=text)
+    c.font = checkbox_font
+    c.alignment = left_center
+    c.fill = fill_white
+    for ci in range(col_start, col_end + 1):
+        ws.cell(row=row, column=ci).border = border_thin
+    ws.row_dimensions[row].height = 22
+
+
+def make_scale_row(ws, row, label_col, label, value_col, scale_start, scale_end,
+                   left_label, right_label, col_end):
+    """Create a scale row: Label [__/12] low ←──────→ high."""
+    c = ws.cell(row=row, column=label_col, value=label)
+    c.font = label_font
+    c.alignment = right_center
+    c.fill = fill_bg
+
+    vc = ws.cell(row=row, column=value_col)
+    vc.font = Font(name="Calibri", bold=True, size=14, color=GOLD)
+    vc.alignment = center
+    vc.fill = fill_white
+    vc.border = border_thin
+
+    # Scale label
+    ws.merge_cells(start_row=row, start_column=value_col + 1, end_row=row, end_column=col_end)
+    sc = ws.cell(row=row, column=value_col + 1,
+                 value=f"  {left_label}  1 ── 2 ── 3 ── 4 ── 5 ── 6 ── 7 ── 8 ── 9 ── 10 ── 11 ── 12  {right_label}")
+    sc.font = Font(name="Calibri", size=8, color=MUTED)
+    sc.alignment = center
+    ws.row_dimensions[row].height = 24
+
+
+def build_fiche(ws, fiche_num):
+    """Build one complete SPAWT fiche on the given worksheet."""
+    # ── Page setup ──
+    ws.page_setup.orientation = "portrait"
+    ws.page_setup.paperSize = ws.PAPERSIZE_A4
+    ws.page_setup.fitToWidth = 1
+    ws.page_setup.fitToHeight = 1
+    ws.sheet_properties.pageSetUpPr.fitToPage = True
+    ws.page_margins = PageMargins(left=0.4, right=0.4, top=0.3, bottom=0.3, header=0.2, footer=0.2)
+    ws.print_options.horizontalCentered = True
+
+    # ── Column widths (8 columns, A-H) ──
+    widths = [12, 14, 10, 14, 10, 14, 10, 14]
+    for i, w in enumerate(widths, 1):
+        ws.column_dimensions[get_column_letter(i)].width = w
+
+    r = 1  # current row
+
+    # ═══════════════════════════════════════════════════
+    # HEADER
+    # ═══════════════════════════════════════════════════
+    ws.merge_cells(f"A{r}:C{r}")
+    c = ws.cell(row=r, column=1, value="SPAWT")
+    c.font = Font(name="Courier New", bold=True, size=22, color=DARK)
+    c.alignment = left_center
+
+    ws.merge_cells(f"D{r}:F{r}")
+    c2 = ws.cell(row=r, column=4, value="Fiche Collecte Terrain")
+    c2.font = Font(name="Calibri", size=12, color=MUTED)
+    c2.alignment = center
+
+    ws.merge_cells(f"G{r}:H{r}")
+    c3 = ws.cell(row=r, column=7, value=f"N° {fiche_num:03d}")
+    c3.font = Font(name="Calibri", bold=True, size=14, color=GOLD)
+    c3.alignment = Alignment(horizontal="right", vertical="center")
+    ws.row_dimensions[r].height = 32
+    r += 1
+
+    # Separator
+    for ci in range(1, 9):
+        ws.cell(row=r, column=ci).border = Border(bottom=Side(style="medium", color=GOLD))
+    ws.row_dimensions[r].height = 4
+    r += 1
+
+    # ═══════════════════════════════════════════════════
+    # BLOC 1 — IDENTIFICATION
+    # ═══════════════════════════════════════════════════
+    make_section_header(ws, r, 1, 8, "📍  IDENTIFICATION", fill_dark)
+    r += 1
+
+    make_label_value(ws, r, 1, "Nom du lieu", 2, 5)
+    make_label_value(ws, r, 6, "Date", 7, 8)
+    r += 1
+
+    make_label_value(ws, r, 1, "Adresse", 2, 5)
+    make_label_value(ws, r, 6, "Spawter", 7, 8)
+    r += 1
+
+    make_label_value(ws, r, 1, "Quartier", 2, 3, validation_key="quartier")
+    make_label_value(ws, r, 4, "Téléphone", 5, 6)
+    make_label_value(ws, r, 7, "GPS", 8, 8)
+    r += 1
+
+    make_checkbox_row(ws, r, 1, 8,
+                      ["WhatsApp", "Facebook", "Instagram", "Site web"],
+                      label="Digital")
+    r += 1
+
+    # ═══════════════════════════════════════════════════
+    # BLOC 2 — OFFRE & CUISINE
+    # ═══════════════════════════════════════════════════
+    make_section_header(ws, r, 1, 8, "🍽️  OFFRE & CUISINE", fill_green)
+    r += 1
+
+    make_checkbox_row(ws, r, 1, 8,
+                      ["Maquis", "Restaurant", "Gargote", "Street food", "Bistrot", "Fine dining", "Snack"],
+                      label="Type")
+    r += 1
+
+    make_checkbox_row(ws, r, 1, 8,
+                      ["Ivoirienne", "Africaine", "Française", "Libanaise", "Asiatique", "Fast food", "Fusion"],
+                      label="Cuisine")
+    r += 1
+
+    make_label_value(ws, r, 1, "Spécialité 1", 2, 4)
+    make_label_value(ws, r, 5, "Spécialité 2", 6, 8)
+    r += 1
+
+    make_label_value(ws, r, 1, "Spécialité 3", 2, 4)
+    make_label_value(ws, r, 5, "Plats sign.", 6, 8)
+    r += 1
+
+    make_checkbox_row(ws, r, 1, 8,
+                      ["Carte photographiée", "Ardoise", "Verbal uniquement"],
+                      label="Menu")
+    r += 1
+
+    # ═══════════════════════════════════════════════════
+    # BLOC 3 — PRIX & RYTHME
+    # ═══════════════════════════════════════════════════
+    make_section_header(ws, r, 1, 8, "💰  PRIX & RYTHME", fill_blue)
+    r += 1
+
+    # Prix headers
+    ws.cell(row=r, column=1).fill = fill_bg
+    for ci, txt in [(2, ""), (3, "Min (F)"), (4, ""), (5, "Max (F)"), (6, ""), (7, ""), (8, "")]:
+        c = ws.cell(row=r, column=ci, value=txt)
+        c.font = Font(name="Calibri", bold=True, size=8, color=MUTED)
         c.alignment = center
-        if r % 2 == 0:
-            c.fill = PatternFill("solid", fgColor="F0F4FA")
-    ws3.row_dimensions[r].height = 22
+        c.fill = fill_bg
+    ws.row_dimensions[r].height = 14
+    r += 1
 
-ws3.freeze_panes = "B2"
+    for label_txt in ["Éco / populaire", "Moyen / standard", "Premium / haut", "Boissons"]:
+        make_label_value(ws, r, 1, label_txt, 2, 3)  # Min
+        ws.merge_cells(start_row=r, start_column=4, end_row=r, end_column=4)
+        ws.cell(row=r, column=4, value="→").font = Font(size=9, color=MUTED)
+        ws.cell(row=r, column=4).alignment = center
+        make_label_value(ws, r, 5, "", 5, 6)  # Max — no label needed since arrow
+        # Patch: remove duplicate label, just use merged cells
+        ws.cell(row=r, column=5).fill = fill_white
+        ws.cell(row=r, column=5).border = border_thin
+        ws.cell(row=r, column=6).border = border_thin
+        ws.merge_cells(start_row=r, start_column=5, end_row=r, end_column=6)
+        ws.merge_cells(start_row=r, start_column=2, end_row=r, end_column=3)
+        r += 1
+
+    make_scale_row(ws, r, 1, "Budget", 2, 3, 8, "bas", "haut", 8)
+    r += 1
+    make_scale_row(ws, r, 1, "Cadence", 2, 3, 8, "lent", "rapide", 8)
+    r += 1
+
+    # ═══════════════════════════════════════════════════
+    # BLOC 4 — LOGISTIQUE
+    # ═══════════════════════════════════════════════════
+    make_section_header(ws, r, 1, 8, "🏢  LOGISTIQUE", fill_grey)
+    r += 1
+
+    make_label_value(ws, r, 1, "Horaires L-V", 2, 3)
+    make_label_value(ws, r, 4, "Samedi", 5, 6)
+    make_label_value(ws, r, 7, "Dimanche", 8, 8)
+    r += 1
+
+    make_label_value(ws, r, 1, "Capacité int.", 2, 2)
+    make_label_value(ws, r, 3, "Cap. ext.", 4, 4)
+    make_label_value(ws, r, 5, "Parking", 6, 6, validation_key="parking")
+    ws.row_dimensions[r].height = 22
+    r += 1
+
+    make_checkbox_row(ws, r, 1, 8,
+                      ["Cash", "Orange Money", "MTN", "Moov", "Wave", "CB"],
+                      label="Paiements")
+    r += 1
+
+    make_checkbox_row(ws, r, 1, 8,
+                      ["Livraison", "À emporter", "Clim", "WiFi", "Terrasse", "Bar"],
+                      label="Services")
+    r += 1
+
+    # ═══════════════════════════════════════════════════
+    # BLOC 5 — DÉGUSTATION
+    # ═══════════════════════════════════════════════════
+    make_section_header(ws, r, 1, 8, "⭐  DÉGUSTATION", fill_red)
+    r += 1
+
+    # Testé ?
+    ws.cell(row=r, column=1, value="Testé ?").font = label_font
+    ws.cell(row=r, column=1).alignment = right_center
+    ws.cell(row=r, column=1).fill = fill_bg
+    ws.merge_cells(f"B{r}:C{r}")
+    ws.cell(row=r, column=2, value="☐ Oui    ☐ Non").font = checkbox_font
+    ws.cell(row=r, column=2).alignment = left_center
+    ws.cell(row=r, column=2).fill = fill_white
+    ws.cell(row=r, column=2).border = border_thin
+
+    make_label_value(ws, r, 4, "Note /5", 5, 5)
+    ws.merge_cells(f"F{r}:H{r}")
+    ws.cell(row=r, column=6, value="☆  ☆  ☆  ☆  ☆").font = Font(size=16, color="D0D0D0")
+    ws.cell(row=r, column=6).alignment = center
+    ws.cell(row=r, column=6).fill = fill_white
+    ws.cell(row=r, column=6).border = border_thin
+    ws.row_dimensions[r].height = 26
+    r += 1
+
+    make_label_value(ws, r, 1, "Plats testés", 2, 8, row_height=28)
+    r += 1
+
+    make_label_value(ws, r, 1, "Budget test", 2, 3)
+    ws.cell(row=r, column=4, value="FCFA").font = hint_font
+    ws.cell(row=r, column=4).alignment = left_center
+    r += 1
+
+    make_label_value(ws, r, 1, "Points forts", 2, 8, row_height=28)
+    r += 1
+    make_label_value(ws, r, 1, "Points faibles", 2, 8, row_height=28)
+    r += 1
+
+    make_checkbox_row(ws, r, 1, 8,
+                      ["🎯 Exact", "🤩 Surprise", "💸 Qualité-prix", "😐 Banal", "😞 Décevant"],
+                      label="Ressenti")
+    r += 1
+
+    make_label_value(ws, r, 1, "Recommandation", 2, 3, validation_key="reco")
+    make_label_value(ws, r, 4, "Accroche", 5, 8)
+    r += 1
+
+    # ═══════════════════════════════════════════════════
+    # BLOC 6 — AMBIANCE & VERDICT
+    # ═══════════════════════════════════════════════════
+    make_section_header(ws, r, 1, 8, "🎭  AMBIANCE & VERDICT", fill_purple)
+    r += 1
+
+    make_scale_row(ws, r, 1, "Ambiance", 2, 3, 8, "simple", "raffiné", 8)
+    r += 1
+    make_scale_row(ws, r, 1, "Sociabilité", 2, 3, 8, "intime", "festif", 8)
+    r += 1
+    make_scale_row(ws, r, 1, "Notoriété", 2, 3, 8, "inconnu", "célèbre", 8)
+    r += 1
+
+    make_checkbox_row(ws, r, 1, 8,
+                      ["Cadres/Pro", "Étudiants", "Familles", "Couples", "Solo", "Touristes", "Mixte"],
+                      label="Clientèle")
+    r += 1
+
+    make_checkbox_row(ws, r, 1, 8,
+                      ["Petit-déj", "Déjeuner", "Goûter", "Dîner", "Tard dans la nuit"],
+                      label="Moments")
+    r += 1
+
+    make_label_value(ws, r, 1, "Affluence", 2, 3, validation_key="affluence")
+    make_label_value(ws, r, 4, "Sonore", 5, 6, validation_key="sonore")
+    r += 1
+
+    make_label_value(ws, r, 1, "Propreté", 2, 3, validation_key="proprete")
+    make_label_value(ws, r, 4, "Accueil", 5, 6, validation_key="accueil")
+    r += 1
+
+    # ── POTENTIEL — big box ──
+    ws.merge_cells(f"A{r}:A{r+1}")
+    c = ws.cell(row=r, column=1, value="POTENTIEL\nSPAWT")
+    c.font = Font(name="Calibri", bold=True, size=10, color=GOLD)
+    c.alignment = center
+    c.fill = fill_light_gold
+    c.border = border_box
+
+    ws.merge_cells(f"B{r}:H{r}")
+    pot_txt = "☐ 🔥 PÉPITE      ☐ ❤️ COUP DE CŒUR      ☐ ✅ SOLIDE      ☐ ⚠️ MOYEN      ☐ ❌ SKIP"
+    c2 = ws.cell(row=r, column=2, value=pot_txt)
+    c2.font = Font(name="Calibri", bold=True, size=10, color=DARK)
+    c2.alignment = center
+    c2.fill = fill_light_gold
+    for ci in range(2, 9):
+        ws.cell(row=r, column=ci).border = border_box
+        ws.cell(row=r, column=ci).fill = fill_light_gold
+    ws.row_dimensions[r].height = 28
+    r += 1
+
+    # Notes terrain
+    ws.merge_cells(f"B{r}:H{r}")
+    make_label_value(ws, r, 2, "", 2, 8, row_height=36)
+    ws.cell(row=r, column=2).value = None
+    ws.cell(row=r, column=2).font = value_font
+    # mini label inside the merged POTENTIEL left cell is already done
+    ws.row_dimensions[r].height = 36
+    r += 1
+
+    # ═══════════════════════════════════════════════════
+    # BLOC 7 — B2B / COMMERCIAL
+    # ═══════════════════════════════════════════════════
+    make_section_header(ws, r, 1, 8, "🤝  B2B / COMMERCIAL", fill_grey)
+    r += 1
+
+    ws.cell(row=r, column=1, value="Contact ?").font = label_font
+    ws.cell(row=r, column=1).alignment = right_center
+    ws.cell(row=r, column=1).fill = fill_bg
+    ws.merge_cells(f"B{r}:C{r}")
+    ws.cell(row=r, column=2, value="☐ Oui    ☐ Non").font = checkbox_font
+    ws.cell(row=r, column=2).alignment = left_center
+    ws.cell(row=r, column=2).fill = fill_white
+    ws.cell(row=r, column=2).border = border_thin
+    make_label_value(ws, r, 4, "Nom", 5, 8)
+    r += 1
+
+    make_label_value(ws, r, 1, "Fonction", 2, 3, validation_key="fonction")
+    make_label_value(ws, r, 4, "Réceptivité", 5, 6, validation_key="receptivite")
+    r += 1
+
+    ws.cell(row=r, column=1, value="RDV pris ?").font = label_font
+    ws.cell(row=r, column=1).alignment = right_center
+    ws.cell(row=r, column=1).fill = fill_bg
+    ws.merge_cells(f"B{r}:C{r}")
+    ws.cell(row=r, column=2, value="☐ Oui    ☐ Non").font = checkbox_font
+    ws.cell(row=r, column=2).alignment = left_center
+    ws.cell(row=r, column=2).fill = fill_white
+    ws.cell(row=r, column=2).border = border_thin
+    make_label_value(ws, r, 4, "Date RDV", 5, 6)
+
+    make_checkbox_row(ws, r, 7, 8, ["Flyer", "Pitch", "CDV"])
+    r += 1
+
+    make_label_value(ws, r, 1, "Notes B2B", 2, 8, row_height=36)
+    r += 1
+
+    # ── Footer ──
+    ws.merge_cells(f"A{r}:H{r}")
+    c = ws.cell(row=r, column=1, value="SPAWT Collecte Terrain — Fiche à remplir sur place")
+    c.font = Font(name="Calibri", size=8, color=MUTED, italic=True)
+    c.alignment = center
+    ws.row_dimensions[r].height = 18
+
+    # ── Print area ──
+    ws.print_area = f"A1:H{r}"
+
+
+# ═══════════════════════════════════════════════════════════════
+# Generate 20 fiches (20 sheets)
+# ═══════════════════════════════════════════════════════════════
+NB_FICHES = 20
+
+for i in range(1, NB_FICHES + 1):
+    if i == 1:
+        ws = wb.active
+        ws.title = f"Fiche {i:03d}"
+    else:
+        ws = wb.create_sheet(f"Fiche {i:03d}")
+    ws.sheet_properties.tabColor = GOLD
+    build_fiche(ws, i)
 
 # ── Save ──
-output_path = "/home/user/project_spawt/SPAWT_Fiches_Collecte.xlsx"
-wb.save(output_path)
-print(f"✅ Fichier créé : {output_path}")
-print(f"   → {len(COLUMNS)} colonnes")
-print(f"   → 100 lignes pré-formatées")
-print(f"   → Listes déroulantes sur {sum(1 for _,_,_,_,v in COLUMNS if v)} champs")
-print(f"   → 3 onglets : Fiches SPAWT, Légende & Guide, Grille Prix Quartiers")
+output = "/home/user/project_spawt/SPAWT_Fiches_Collecte.xlsx"
+wb.save(output)
+print(f"✅ {output}")
+print(f"   → {NB_FICHES} fiches individuelles (1 onglet = 1 fiche)")
+print(f"   → Format A4 portrait, prêt à imprimer")
+print(f"   → Checkboxes à cocher, cases à remplir")
+print(f"   → Listes déroulantes sur les champs clés")
